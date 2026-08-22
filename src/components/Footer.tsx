@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageType } from '../types';
-import { Globe, Mail, Phone, MapPin, ShieldCheck, Lock, CheckCircle2 } from 'lucide-react';
+import { Globe, ShieldCheck, Lock, CheckCircle2 } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (page: PageType) => void;
@@ -42,10 +42,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
       {/* Main Footer Links */}
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           
           {/* Brand Info */}
-          <div className="space-y-4 md:col-span-1">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center">
                 <Globe className="w-5 h-5" />
@@ -57,7 +57,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <p className="text-slate-300 font-semibold text-sm italic">
               "언어의 한계를 넘어 글로벌 가치를 전달합니다."
             </p>
-            <p className="text-slate-400 text-xs leading-relaxed">
+            <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
               글로벌 비즈니스 및 개인 고객을 위한 전문 번역, 원어민 감수, 웹/앱 현지화 서비스를 제공하는 글로컬리제이션 전문 기관입니다.
             </p>
           </div>
@@ -118,27 +118,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* Global Operations & Contact */}
-          <div>
-            <h5 className="text-white font-bold text-sm tracking-wider uppercase mb-4 text-slate-200">
-              글로벌 고객 지원
-            </h5>
-            <ul className="space-y-3 text-xs text-slate-300">
-              <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                <span>글로벌 허브: 서울 • 뉴욕 • 런던 • 도쿄 • 싱가포르</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>contact@trixtranslate.com</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>02-555-TRIX (한국 직통)</span>
-              </li>
-            </ul>
-          </div>
-
         </div>
 
         {/* Bottom Bar */}
@@ -149,7 +128,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div className="flex items-center gap-6">
             <span className="hover:text-slate-300 cursor-pointer">개인정보 처리방침</span>
             <span className="hover:text-slate-300 cursor-pointer">이용약관</span>
-            <span className="hover:text-slate-300 cursor-pointer">글로벌 지사 안내</span>
+            <span className="hover:text-slate-300 cursor-pointer">보안 및 품질 서약</span>
           </div>
         </div>
       </div>

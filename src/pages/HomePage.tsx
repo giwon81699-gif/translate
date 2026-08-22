@@ -104,7 +104,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                     <span className="w-3 h-3 rounded-full bg-red-500/90 inline-block" />
                     <span className="w-3 h-3 rounded-full bg-yellow-500/90 inline-block" />
                     <span className="w-3 h-3 rounded-full bg-green-500/90 inline-block" />
-                    <span className="text-xs font-mono font-bold text-slate-300 ml-2">TRIX-GLOBAL-L10N</span>
                   </div>
                   <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
                     50개국 실시간 원어민 검수

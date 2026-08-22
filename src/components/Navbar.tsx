@@ -9,7 +9,7 @@ import {
   ArrowRight, 
   ShieldCheck, 
   Clock,
-  Sparkles
+  Lock
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -17,15 +17,13 @@ interface NavbarProps {
   onNavigate: (page: PageType) => void;
   savedQuotesCount: number;
   onOpenTracker: () => void;
-  onOpenEstimator: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentPage,
   onNavigate,
   savedQuotesCount,
-  onOpenTracker,
-  onOpenEstimator
+  onOpenTracker
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -56,13 +54,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           
           <div className="flex items-center gap-4">
-            <button 
-              onClick={onOpenEstimator}
-              className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors font-medium text-xs cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5" /> 실시간 단어수/비용 계산기
-            </button>
-            <span className="text-slate-600">|</span>
+            <span className="text-slate-400 hidden sm:inline-flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-blue-400" />
+              <span>영업시간 내 2시간 이내 견적 회신</span>
+            </span>
+            <span className="text-slate-600 hidden sm:inline">|</span>
             <button
               onClick={onOpenTracker}
               className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors cursor-pointer"

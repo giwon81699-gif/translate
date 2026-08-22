@@ -95,7 +95,6 @@ export default function App() {
         onNavigate={handleNavigate}
         savedQuotesCount={savedQuotes.length}
         onOpenTracker={() => setTrackerOpen(true)}
-        onOpenEstimator={() => setEstimatorOpen(true)}
       />
 
       {/* Main Page View */}
@@ -103,7 +102,6 @@ export default function App() {
         {currentPage === 'home' && (
           <HomePage
             onNavigate={handleNavigate}
-            onOpenEstimator={() => setEstimatorOpen(true)}
           />
         )}
 

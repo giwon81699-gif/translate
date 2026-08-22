@@ -8,25 +8,25 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   Star, 
-  Zap,
+  Zap, 
   ChevronRight,
-  Calculator
+  BookOpen
 } from 'lucide-react';
 
 interface HomePageProps {
   onNavigate: (page: PageType, servicePreselect?: string) => void;
-  onOpenEstimator: () => void;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator }) => {
+export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-20 pb-16">
       
       {/* HERO SECTION */}
-      <section className="relative overflow-hidden bg-slate-900 text-white pt-16 pb-24 lg:pt-24 lg:pb-32">
-        {/* Background Grids & Glow */}
-        <div className="absolute inset-0 bg-radial-gradient opacity-60 pointer-events-none" />
-        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+      <section className="relative overflow-hidden bg-ambient-hero text-white pt-16 pb-24 lg:pt-24 lg:pb-32">
+        {/* Ambient background glows */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-600/15 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/3 right-10 w-[400px] h-[300px] bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute inset-0 bg-subtle-mesh opacity-30 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -35,16 +35,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator 
             <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
               
               {/* Trust Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-widest shadow-xs">
                 <Globe className="w-4 h-4 text-blue-400" />
-                <span>글로벌 전문 번역 & 현지화 서비스</span>
+                <span>전 세계 50개국+ 다국어 전문 번역 & 현지화</span>
               </div>
 
               {/* Main Headline */}
               <div className="space-y-3">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-none">
                   언어를 넘어, <br className="hidden sm:inline" />
-                  <span className="text-blue-400">세계로 연결합니다.</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-300">세계로 연결합니다.</span>
                 </h1>
                 
                 {/* Subheadline */}
@@ -55,41 +55,41 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator 
 
               {/* Supporting Text */}
               <p className="text-base text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                기업 계약서, IT/앱 현지화, 해외 이커머스 상세페이지부터 마케팅 홍보물까지 50여 개 언어 원어민 전문가가 정밀하게 번역합니다.
+                기업 계약서, IT/앱 현지화, 해외 이커머스 상세페이지부터 마케팅 홍보물까지 <span className="text-blue-300 font-bold">50개국 이상의 공인 원어민 전문가</span>가 뉘앙스와 전문성을 살려 정밀하게 번역합니다.
               </p>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
                 <button
                   onClick={() => onNavigate('quote')}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded shadow-sm transition-colors uppercase cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-extrabold rounded-xl shadow-lg shadow-blue-600/30 transition-all uppercase cursor-pointer flex items-center justify-center gap-2"
                 >
                   <span>무료 견적 문의하기</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
 
                 <button
-                  onClick={onOpenEstimator}
-                  className="w-full sm:w-auto px-6 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-sm font-bold rounded transition-colors uppercase flex items-center justify-center gap-2 cursor-pointer"
+                  onClick={() => onNavigate('services')}
+                  className="w-full sm:w-auto px-6 py-3.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 text-sm font-bold rounded-xl transition-all uppercase flex items-center justify-center gap-2 cursor-pointer backdrop-blur-xs"
                 >
-                  <Calculator className="w-4 h-4 text-blue-400" />
-                  <span>실시간 단어수/비용 계산기</span>
+                  <BookOpen className="w-4 h-4 text-blue-400" />
+                  <span>서비스 안내 보기</span>
                 </button>
               </div>
 
               {/* Key Trust Stats */}
               <div className="pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-4 text-center lg:text-left">
                 <div>
-                  <div className="text-2xl font-extrabold text-white">50+</div>
-                  <div className="text-xs text-slate-400 font-medium">지원 언어 조합</div>
+                  <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">50개국+</div>
+                  <div className="text-xs text-slate-400 font-medium mt-0.5">글로벌 지원 언어</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-extrabold text-blue-400">99.8%</div>
-                  <div className="text-xs text-slate-400 font-medium">정시 납기 준수율</div>
+                  <div className="text-2xl sm:text-3xl font-black text-blue-400 tracking-tight">99.8%</div>
+                  <div className="text-xs text-slate-400 font-medium mt-0.5">정시 납기 준수율</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-extrabold text-emerald-400">ISO 17100</div>
-                  <div className="text-xs text-slate-400 font-medium">국제 품질 인증</div>
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">ISO 17100</div>
+                  <div className="text-xs text-slate-400 font-medium mt-0.5">국제 품질 인증</div>
                 </div>
               </div>
 
@@ -97,38 +97,53 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator 
 
             {/* Right Interactive Preview Widget */}
             <div className="lg:col-span-5">
-              <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-6 shadow-2xl space-y-5 backdrop-blur-md">
+              <div className="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-6 shadow-2xl space-y-5 backdrop-blur-xl bg-card-glow">
                 
-                <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-500 inline-block" />
-                    <span className="w-3 h-3 rounded-full bg-green-500 inline-block" />
-                    <span className="text-xs font-mono font-bold text-slate-400 ml-2">TRIX-L10N-ENGINE</span>
+                    <span className="w-3 h-3 rounded-full bg-red-500/90 inline-block" />
+                    <span className="w-3 h-3 rounded-full bg-yellow-500/90 inline-block" />
+                    <span className="w-3 h-3 rounded-full bg-green-500/90 inline-block" />
+                    <span className="text-xs font-mono font-bold text-slate-300 ml-2">TRIX-GLOBAL-L10N</span>
                   </div>
-                  <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    실시간 원어민 검수
+                  <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                    50개국 실시간 원어민 검수
                   </span>
                 </div>
 
-                <div className="space-y-3 text-xs">
-                  <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-700/60">
+                <div className="space-y-3.5 text-xs">
+                  <div className="p-3.5 bg-slate-950/80 rounded-xl border border-slate-800">
                     <div className="text-slate-400 font-bold mb-1 uppercase tracking-wider text-[10px]">원문 (English Source):</div>
                     <p className="text-slate-200 font-medium">"Expand your brand globally with confidence and authentic local appeal."</p>
                   </div>
 
                   <div className="flex justify-center">
-                    <div className="p-1.5 rounded-full bg-blue-600 text-white">
+                    <div className="p-1.5 rounded-full bg-blue-600 text-white shadow-md shadow-blue-500/40">
                       <Zap className="w-4 h-4" />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-blue-950/50 rounded-xl border border-blue-800/60">
-                    <div className="text-blue-300 font-bold mb-1 uppercase tracking-wider text-[10px] flex justify-between">
-                      <span>타겟: 한국어 / 일본어 / 독일어 / 스페인어</span>
-                      <span className="text-emerald-400">100% 원어민 현지화</span>
+                  <div className="p-3.5 bg-blue-950/40 rounded-xl border border-blue-800/60 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-blue-300 font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-blue-400" />
+                        <span>타겟: 전 세계 50개국+ 다국어 지원</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 whitespace-nowrap">
+                        100% 원어민
+                      </span>
                     </div>
-                    <p className="text-white font-bold text-sm">
+
+                    {/* Multi-language badges */}
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {['한국어', '영어', '일본어', '중국어', '독일어', '스페인어', '프랑스어', '베트남어', '+42개 언어'].map((lang, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded-md bg-blue-900/60 border border-blue-700/40 text-blue-200 text-[10px] font-semibold">
+                          {lang}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p className="text-white font-bold text-xs sm:text-sm pt-2 border-t border-blue-900/60 leading-relaxed">
                       확고한 신뢰와 현지 문화에 울림을 주는 언어로 귀사 브랜드의 성공적인 세계 진출을 지원합니다.
                     </p>
                   </div>
@@ -137,9 +152,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator 
                 <div className="pt-2 text-center">
                   <button
                     onClick={() => onNavigate('quote')}
-                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl transition-all shadow-md shadow-blue-600/30 cursor-pointer"
                   >
-                    프로젝트 문서 제출하고 빠른 견적 받기 →
+                    50개국 다국어 번역 무료 견적 신청하기 →
                   </button>
                 </div>
 
@@ -160,7 +175,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator 
             맞춤형 원어민 번역 서비스
           </h2>
           <p className="text-slate-600 text-base">
-            단 한 장의 비즈니스 문서부터 대규모 글로벌 플랫폼 현지화까지 신속하게 처리해 드립니다.
+            단 한 장의 비즈니스 문서부터 대규모 글로벌 플랫폼 현지화까지 50여 개 언어로 신속하게 처리해 드립니다.
           </p>
         </div>
 
@@ -194,16 +209,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator 
                 </ul>
               </div>
 
-              <div className="pt-6 mt-4 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">
+              <div className="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 truncate min-w-0">
                   예상 소요시간: {service.turnaround}
                 </span>
                 <button
                   onClick={() => onNavigate('quote', service.id)}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                 >
-                  <span>견적 문의</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <span className="whitespace-nowrap">견적 문의</span>
+                  <ChevronRight className="w-3.5 h-3.5 shrink-0" />
                 </button>
               </div>
             </div>
@@ -294,13 +309,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
           <span className="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-            고객 후기
+            고객 이용 후기
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-            글로벌 기업들이 신뢰하는 파트너
+            실제 이용 고객님들의 만족 피드백
           </h2>
           <p className="text-slate-600 text-base">
-            IT 스타트업, 이커머스 셀러, 법률사무소, 글로벌 브랜드들의 성공 사례를 확인해보세요.
+            IT 개발, 이커머스 해외 진출, 법률 자문, 글로벌 마케팅 분야 고객님들의 프로젝트 후기입니다.
           </p>
         </div>
 
@@ -334,7 +349,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate, onOpenEstimator 
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 text-sm">{t.clientName}</h4>
-                    <p className="text-xs text-slate-500">{t.companyRole}, <span className="font-semibold text-slate-700">{t.companyName}</span></p>
+                    <p className="text-xs text-slate-500 font-medium">{t.companyRole}</p>
                   </div>
                 </div>
 

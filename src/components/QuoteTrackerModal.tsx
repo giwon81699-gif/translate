@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { QuoteRequest } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   X, 
   Search, 
@@ -9,7 +10,10 @@ import {
   AlertCircle, 
   Copy, 
   Check, 
-  MessageSquare
+  MessageSquare,
+  ShieldCheck,
+  Lock,
+  ArrowRight
 } from 'lucide-react';
 
 interface QuoteTrackerModalProps {
@@ -18,15 +22,63 @@ interface QuoteTrackerModalProps {
   savedQuotes: QuoteRequest[];
 }
 
+// Security: Mask sensitive applicant information
+export function maskEmail(email: string): string {
+  if (!email || !email.includes('@')) return email;
+  const [username, domain] = email.split('@');
+  if (username.length <= 2) {
+    return `${username[0]}***@${domain}`;
+  } else if (username.length <= 4) {
+    return `${username.slice(0, 2)}***@${domain}`;
+  } else {
+    return `${username.slice(0, 3)}***@${domain}`;
+  }
+}
+
+export function maskPhone(phone: string): string {
+  if (!phone) return phone;
+  const trimmed = phone.trim();
+  // If formatted like 010-1234-5678 or 010.1234.5678
+  const parts = trimmed.split(/[- .]/);
+  if (parts.length >= 3) {
+    const maskedMiddle = '*'.repeat(Math.max(parts[1].length, 4));
+    return `${parts[0]}-${maskedMiddle}-${parts.slice(2).join('-')}`;
+  }
+  // If consecutive digits e.g. 01012345678
+  const digitsOnly = trimmed.replace(/\D/g, '');
+  if (digitsOnly.length >= 10) {
+    const head = digitsOnly.slice(0, 3);
+    const tail = digitsOnly.slice(-4);
+    return `${head}-****-${tail}`;
+  }
+  if (trimmed.length > 6) {
+    return `${trimmed.slice(0, 3)}****${trimmed.slice(-3)}`;
+  }
+  return '***-****';
+}
+
+export function maskName(name: string): string {
+  if (!name) return name;
+  const trimmed = name.trim();
+  if (trimmed.length <= 2) {
+    return `${trimmed[0]}*`;
+  }
+  if (trimmed.length === 3) {
+    return `${trimmed[0]}*${trimmed[2]}`;
+  }
+  return `${trimmed.slice(0, 2)}${'*'.repeat(trimmed.length - 3)}${trimmed.slice(-1)}`;
+}
+
 export const QuoteTrackerModal: React.FC<QuoteTrackerModalProps> = ({
   isOpen,
   onClose,
   savedQuotes
 }) => {
+  const { t } = useLanguage();
   const [searchId, setSearchId] = useState('');
-  const [selectedQuote, setSelectedQuote] = useState<QuoteRequest | null>(
-    savedQuotes.length > 0 ? savedQuotes[0] : null
-  );
+  const [hasSearched, setHasSearched] = useState(false);
+  const [selectedQuote, setSelectedQuote] = useState<QuoteRequest | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [noteSuccess, setNoteSuccess] = useState(false);
@@ -35,15 +87,34 @@ export const QuoteTrackerModal: React.FC<QuoteTrackerModalProps> = ({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchId.trim()) return;
+    const query = searchId.trim();
+    if (!query) {
+      setErrorMessage(t.tracker.searchEmptyNotice);
+      setSelectedQuote(null);
+      setHasSearched(true);
+      return;
+    }
+
+    setErrorMessage(null);
+    setHasSearched(true);
+
     const found = savedQuotes.find(
-      q => q.id.toLowerCase() === searchId.trim().toLowerCase()
+      q => q.id.toLowerCase() === query.toLowerCase()
     );
+
     if (found) {
       setSelectedQuote(found);
     } else {
-      alert(`접수 번호 "${searchId}"를 최근 신청 내역에서 찾을 수 없습니다. 최근에 접수하셨다면 접수 번호를 확인해주세요.`);
+      setSelectedQuote(null);
+      setErrorMessage(t.tracker.searchNotFound);
     }
+  };
+
+  const handleResetSearch = () => {
+    setSearchId('');
+    setSelectedQuote(null);
+    setErrorMessage(null);
+    setHasSearched(false);
   };
 
   const copyToClipboard = (text: string) => {
@@ -57,7 +128,7 @@ export const QuoteTrackerModal: React.FC<QuoteTrackerModalProps> = ({
     if (!noteText.trim()) return;
     setNoteSuccess(true);
     setNoteText('');
-    setTimeout(() => setNoteSuccess(false), 3000);
+    setTimeout(() => setNoteSuccess(false), 3500);
   };
 
   const getStatusStepIndex = (status: QuoteRequest['status']) => {
@@ -71,143 +142,169 @@ export const QuoteTrackerModal: React.FC<QuoteTrackerModalProps> = ({
     }
   };
 
-  const getStatusLabelInKorean = (status: QuoteRequest['status']) => {
+  const getStatusLabel = (status: QuoteRequest['status']) => {
     switch (status) {
-      case 'Received': return '접수 완료';
-      case 'Under Review': return '검토 중';
-      case 'Quotation Sent': return '견적서 발송 완료';
-      case 'In Progress': return '번역 진행 중';
-      case 'Completed': return '최종 납품 완료';
-      default: return '접수 완료';
+      case 'Received': return t.tracker.steps.received;
+      case 'Under Review': return t.tracker.steps.review;
+      case 'Quotation Sent': return t.tracker.steps.quoteSent;
+      case 'In Progress': return t.tracker.steps.inProgress;
+      case 'Completed': return t.tracker.steps.completed;
+      default: return t.tracker.steps.received;
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
+      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] text-slate-800">
         
-        {/* Header */}
-        <div className="bg-slate-900 text-white p-6 flex items-center justify-between border-b border-slate-800">
+        {/* Header - Windly Clean Light Aesthetic */}
+        <div className="bg-[#F8FAFC] p-5 sm:p-6 flex items-center justify-between border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm shadow-blue-500/20">
               <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold">신청 내역 & 진행 상태 조회</h3>
-              <p className="text-xs text-slate-400">실시간 진행 상태 및 제출한 프로젝트 정보를 확인하세요</p>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                  {t.tracker.modalTitle}
+                </h3>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                  <Lock className="w-3 h-3" /> {t.tracker.securityBadge}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {t.tracker.modalSubtitle}
+              </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+            aria-label={t.tracker.closeBtn}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 text-slate-700 bg-white">
           
-          {/* Lookup Input */}
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="접수 번호를 입력하세요 (예: TRIX-2026-8942)..."
-                value={searchId}
-                onChange={(e) => setSearchId(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl transition-all cursor-pointer"
-            >
-              조회하기
-            </button>
-          </form>
-
-          {/* Recent Submissions Picker if multiple */}
-          {savedQuotes.length > 0 && (
-            <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
-                이 브라우저에서 신청한 내역 ({savedQuotes.length}건)
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {savedQuotes.map((q) => (
+          {/* Strictly Single-Query Search Input - Zero Leaks */}
+          <div className="space-y-2">
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder={t.tracker.searchPlaceholder}
+                  value={searchId}
+                  onChange={(e) => setSearchId(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all font-mono"
+                />
+                {searchId && (
                   <button
-                    key={q.id}
-                    onClick={() => setSelectedQuote(q)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-2 cursor-pointer ${
-                      selectedQuote?.id === q.id
-                        ? 'bg-blue-50 border-blue-600 text-blue-700 font-bold'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
+                    type="button"
+                    onClick={handleResetSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-700"
                   >
-                    <span className="font-mono">{q.id}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-bold">
-                      {getStatusLabelInKorean(q.status)}
-                    </span>
+                    <X className="w-4 h-4" />
                   </button>
-                ))}
+                )}
+              </div>
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm shadow-blue-600/30 cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-[0.98]"
+              >
+                <span>{t.tracker.searchBtn}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+
+            <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+              <span className="flex items-center gap-1.5 font-medium">
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                <span>{t.tracker.searchHelpText}</span>
+              </span>
+              <span className="text-slate-400 font-mono hidden sm:inline">{t.tracker.searchExample}</span>
+            </div>
+          </div>
+
+          {/* Error Message if Not Found or Empty */}
+          {errorMessage && (
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3 text-xs animate-fadeIn">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+              <div className="leading-relaxed">
+                <p className="font-bold">{errorMessage}</p>
+                <p className="text-rose-700 mt-1">
+                  {t.tracker.notFoundDesc}
+                </p>
               </div>
             </div>
           )}
 
-          {/* Selected Quote Details */}
+          {/* Selected Quote Details - Strictly rendered ONLY when a single quote matches */}
           {selectedQuote ? (
-            <div className="space-y-6">
+            <div className="space-y-5 animate-fadeIn">
               
               {/* Quote Overview Card */}
-              <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 pb-3">
+              <div className="bg-[#F8FAFF] p-5 rounded-xl border border-blue-200/90 space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-blue-100 pb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-500">접수 번호:</span>
-                      <span className="font-mono font-bold text-slate-900">{selectedQuote.id}</span>
+                      <span className="text-xs text-slate-500 font-medium">{t.tracker.quoteIdLabel}:</span>
+                      <span className="font-mono font-bold text-blue-600 text-base">{selectedQuote.id}</span>
                       <button 
                         onClick={() => copyToClipboard(selectedQuote.id)}
-                        className="text-xs text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                        className="text-xs text-slate-600 hover:text-blue-600 flex items-center gap-1 bg-white hover:bg-blue-50 border border-slate-200 px-2 py-0.5 rounded transition-colors cursor-pointer"
+                        title={t.tracker.copyBtn}
                       >
-                        {copiedId ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedId ? '복사됨' : '복사'}</span>
+                        {copiedId ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                        <span className="text-[11px] font-semibold">{copiedId ? t.tracker.copiedBtn : t.tracker.copyBtn}</span>
                       </button>
                     </div>
                     <div className="text-xs text-slate-500 mt-1">
-                      신청 일시: {new Date(selectedQuote.createdAt).toLocaleString('ko-KR')}
+                      {t.tracker.submittedAt}: {new Date(selectedQuote.createdAt).toLocaleString()}
                     </div>
                   </div>
 
-                  <div className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1.5">
+                  <div className="px-3.5 py-1.5 rounded-full text-xs font-bold bg-white text-blue-700 border border-blue-200 flex items-center gap-1.5 shadow-xs">
                     <Clock className="w-3.5 h-3.5 text-blue-600" />
-                    <span>현재 진행 상태: {getStatusLabelInKorean(selectedQuote.status)}</span>
+                    <span>{t.tracker.statusLabel}: <strong className="text-blue-700">{getStatusLabel(selectedQuote.status)}</strong></span>
                   </div>
                 </div>
 
                 {/* Progress Stepper */}
                 <div className="py-2">
-                  <div className="text-xs font-semibold text-slate-700 mb-3">프로젝트 처리 단계:</div>
-                  <div className="grid grid-cols-5 gap-1 text-center">
+                  <div className="grid grid-cols-5 gap-1.5 text-center relative">
                     {[
-                      { step: 1, label: '접수 완료' },
-                      { step: 2, label: '검토 중' },
-                      { step: 3, label: '견적서 발송' },
-                      { step: 4, label: '번역가 배정' },
-                      { step: 5, label: '최종 완료' }
+                      { step: 1, label: t.tracker.steps.received },
+                      { step: 2, label: t.tracker.steps.review },
+                      { step: 3, label: t.tracker.steps.quoteSent },
+                      { step: 4, label: t.tracker.steps.inProgress },
+                      { step: 5, label: t.tracker.steps.completed }
                     ].map((st) => {
                       const currentStep = getStatusStepIndex(selectedQuote.status);
                       const isDone = st.step <= currentStep;
+                      const isCurrent = st.step === currentStep;
+
                       return (
                         <div key={st.step} className="flex flex-col items-center">
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mb-1 transition-all ${
-                            isDone 
-                              ? 'bg-blue-600 text-white shadow-xs' 
-                              : 'bg-slate-200 text-slate-500'
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold mb-1.5 transition-all ${
+                            isCurrent
+                              ? 'bg-blue-600 text-white ring-4 ring-blue-100 shadow-md shadow-blue-500/20'
+                              : isDone
+                              ? 'bg-emerald-600 text-white shadow-xs'
+                              : 'bg-white text-slate-400 border border-slate-200'
                           }`}>
                             {isDone ? <Check className="w-4 h-4" /> : st.step}
                           </div>
-                          <span className={`text-[10px] font-medium leading-tight ${isDone ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>
+                          <span className={`text-[11px] leading-tight ${
+                            isCurrent
+                              ? 'text-blue-600 font-bold'
+                              : isDone 
+                              ? 'text-slate-800 font-semibold' 
+                              : 'text-slate-400'
+                          }`}>
                             {st.label}
                           </span>
                         </div>
@@ -217,108 +314,151 @@ export const QuoteTrackerModal: React.FC<QuoteTrackerModalProps> = ({
                 </div>
               </div>
 
-              {/* Inquiry Details Grid */}
+              {/* Applicant & Project Details - Privacy Enforced with Masking */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2">
-                  <div className="font-bold text-slate-900 border-b border-slate-100 pb-1 text-xs">신청자 정보</div>
-                  <div><span className="text-slate-500">성함/기업명:</span> <span className="font-semibold text-slate-800">{selectedQuote.name}</span></div>
-                  <div><span className="text-slate-500">이메일:</span> <span className="font-semibold text-slate-800">{selectedQuote.email}</span></div>
-                  <div><span className="text-slate-500">연락처:</span> <span className="font-semibold text-slate-800">{selectedQuote.contactNumber}</span></div>
+                
+                {/* Applicant Info (Strictly Masked) */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                      {t.tracker.clientInfoTitle}
+                    </span>
+                    <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold">
+                      {t.tracker.maskedBadge}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-medium">{t.tracker.nameLabel}:</span>{' '}
+                    <span className="font-bold text-slate-900">{maskName(selectedQuote.name)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-medium">{t.tracker.emailLabel}:</span>{' '}
+                    <span className="font-mono font-bold text-slate-900">{maskEmail(selectedQuote.email)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-medium">{t.tracker.phoneLabel}:</span>{' '}
+                    <span className="font-mono font-bold text-slate-900">{maskPhone(selectedQuote.contactNumber)}</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 pt-1 border-t border-slate-200">
+                    {t.tracker.maskedNotice}
+                  </div>
                 </div>
 
-                <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2">
-                  <div className="font-bold text-slate-900 border-b border-slate-100 pb-1 text-xs">언어 및 일정</div>
-                  <div><span className="text-slate-500">언어 조합:</span> <span className="font-bold text-blue-700">{selectedQuote.sourceLanguage} → {selectedQuote.targetLanguage}</span></div>
-                  <div><span className="text-slate-500">희망 납기일:</span> <span className="font-semibold text-slate-800">{selectedQuote.preferredDeadline}</span></div>
-                  <div><span className="text-slate-500">번역 목적:</span> <span className="font-semibold text-slate-800">{selectedQuote.translationPurpose}</span></div>
+                {/* Project Specs */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+                  <div className="font-bold text-slate-900 border-b border-slate-200 pb-2 text-xs">
+                    {t.tracker.langPairLabel} & {t.tracker.deadlineLabel}
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-medium">{t.tracker.langPairLabel}:</span>{' '}
+                    <span className="font-bold text-blue-600">{selectedQuote.sourceLanguage} → {selectedQuote.targetLanguage}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-medium">{t.tracker.deadlineLabel}:</span>{' '}
+                    <span className="font-semibold text-slate-800">{selectedQuote.preferredDeadline}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-medium">{t.tracker.purposeLabel}:</span>{' '}
+                    <span className="font-semibold text-slate-800">{selectedQuote.translationPurpose}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Attached Files */}
-              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
+              {/* Attached Files List */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
                 <div className="font-bold text-slate-900 text-xs flex justify-between items-center">
-                  <span>첨부 파일 ({selectedQuote.files.length}개)</span>
-                  <span className="text-[11px] text-slate-500 font-normal">보안 서버 보관</span>
+                  <span>{t.tracker.attachedFilesTitle} ({selectedQuote.files.length})</span>
+                  <span className="text-[10px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-semibold">
+                    {t.tracker.secureStorageBadge}
+                  </span>
                 </div>
                 {selectedQuote.files.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic">첨부된 파일이 없습니다.</p>
+                  <p className="text-xs text-slate-500 italic">{t.tracker.noFiles}</p>
                 ) : (
                   <div className="space-y-2">
                     {selectedQuote.files.map((file, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-xs">
+                      <div key={idx} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200 text-xs shadow-xs">
                         <div className="flex items-center gap-2 overflow-hidden">
                           <FileText className="w-4 h-4 text-blue-600 shrink-0" />
-                          <span className="font-medium text-slate-800 truncate">{file.name}</span>
+                          <span className="font-semibold text-slate-800 truncate">{file.name}</span>
                           <span className="text-[10px] text-slate-400 font-mono">({(file.size / 1024).toFixed(1)} KB)</span>
                         </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-medium">업로드됨</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">
+                          {t.tracker.storedBadge}
+                        </span>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Project Requirements text */}
-              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2 text-xs">
-                <div className="font-bold text-slate-900">프로젝트 세부 요청사항</div>
-                <p className="text-slate-700 bg-slate-50 p-3 rounded-lg leading-relaxed whitespace-pre-wrap border border-slate-100">
-                  {selectedQuote.projectDetails || '별도 작성된 세부 요청사항이 없습니다.'}
+              {/* Project Requirements */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+                <div className="font-bold text-slate-900">{t.tracker.projectDetailsTitle}</div>
+                <p className="text-slate-700 bg-white p-3 rounded-lg leading-relaxed whitespace-pre-wrap border border-slate-200">
+                  {selectedQuote.projectDetails || t.tracker.noDetails}
                 </p>
               </div>
 
-              {/* Add Follow-Up Note to Project Manager */}
-              <div className="p-4 bg-blue-50/60 border border-blue-200/80 rounded-xl space-y-3">
-                <div className="flex items-center gap-2 text-blue-900 font-bold text-xs">
+              {/* Follow-up with PM */}
+              <div className="p-4 bg-[#F8FAFF] border border-blue-200 rounded-xl space-y-3">
+                <div className="flex items-center gap-2 text-blue-700 font-bold text-xs">
                   <MessageSquare className="w-4 h-4 text-blue-600" />
-                  <span>담당 PM에게 추가 메시지/파일 변경 전달</span>
+                  <span>{t.tracker.contactPmTitle}</span>
                 </div>
-                <form onSubmit={handleAddNote} className="space-y-2">
+                <form onSubmit={handleAddNote} className="space-y-2.5">
                   <textarea
                     rows={2}
-                    placeholder="수정된 문서 전달, 추가 요구사항, 납기 문의 사항이 있으시면 입력해 주세요..."
+                    placeholder={t.tracker.contactPmPlaceholder}
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-blue-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                   />
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     {noteSuccess ? (
                       <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> 메시지가 전담 PM팀에게 전송되었습니다!
+                        <CheckCircle2 className="w-3.5 h-3.5" /> {t.tracker.noteSentSuccess}
                       </span>
                     ) : (
-                      <span className="text-[11px] text-slate-500">평균 답변 시간: 15~30분 이내</span>
+                      <span className="text-[11px] text-slate-500">{t.tracker.responseTimeNotice}</span>
                     )}
                     <button
                       type="submit"
                       disabled={!noteText.trim()}
-                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold text-xs rounded-lg transition-colors cursor-pointer"
+                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer shrink-0"
                     >
-                      메시지 전송
+                      {t.tracker.sendNoteBtn}
                     </button>
                   </div>
                 </form>
               </div>
 
             </div>
-          ) : (
-            <div className="text-center py-12 text-slate-500 space-y-3">
-              <AlertCircle className="w-12 h-12 text-slate-300 mx-auto" />
-              <p className="font-semibold text-sm">최근 접수된 견적 내역이 없습니다.</p>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                무료 견적 문의 페이지에서 번역 신청을 진행해주시면 즉시 조회 가능한 접수 번호가 발급됩니다.
+          ) : !hasSearched ? (
+            /* Clean Empty State Before Query - Zero information exposed */
+            <div className="text-center py-10 px-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center">
+                <Search className="w-6 h-6" />
+              </div>
+              <p className="font-bold text-sm text-slate-800">
+                {t.tracker.emptyStateTitle}
+              </p>
+              <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                {t.tracker.emptyStateDesc}
               </p>
             </div>
-          )}
+          ) : null}
 
         </div>
 
         {/* Footer actions */}
-        <div className="bg-slate-50 p-4 border-t border-slate-200 flex justify-end">
+        <div className="bg-[#F8FAFC] p-4 border-t border-slate-200 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs rounded-xl transition-colors cursor-pointer"
+            className="px-5 py-2 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer border border-slate-200 shadow-xs"
           >
-            창 닫기
+            {t.tracker.closeBtn}
           </button>
         </div>
 

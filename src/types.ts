@@ -6,6 +6,7 @@ export interface AttachedFile {
   size: number;
   type: string;
   uploadDate: string;
+  dataBase64?: string;
 }
 
 export interface QuoteRequest {

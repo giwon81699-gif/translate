@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 import { Globe, ShieldCheck, Lock, CheckCircle2 } from 'lucide-react';
 
 interface FooterProps {
@@ -7,34 +8,37 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+  const { t } = useLanguage();
+
   const handleNav = (page: PageType) => {
     onNavigate(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800">
-      {/* Top Footer Callout */}
-      <div className="border-b border-slate-800/80 bg-slate-950/50 py-10 px-4 sm:px-6 lg:px-8">
+    <footer className="bg-[#F8FAFC] text-slate-600 border-t border-slate-200/80">
+      
+      {/* Top Banner Callout */}
+      <div className="border-b border-slate-200 bg-white py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400">
-              <ShieldCheck className="w-7 h-7" />
+          <div className="flex items-center gap-3.5">
+            <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-600">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-white font-bold text-base">ISO 17100 국제 번역 품질 인증</h4>
-              <p className="text-slate-400 text-xs mt-0.5">전문 원어민 2단계 크로스 감수, 철저한 용어집 작성, 100% 비밀유지 보장.</p>
+              <h4 className="text-slate-900 font-bold text-sm tracking-tight">{t.footer.isoTitle}</h4>
+              <p className="text-slate-600 text-xs mt-0.5">{t.footer.isoDesc}</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center gap-5 text-xs text-slate-600 font-medium">
             <div className="flex items-center gap-1.5">
-              <Lock className="w-4 h-4 text-emerald-400" />
-              <span>철저한 비밀유지계약 (NDA) 체결</span>
+              <Lock className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{t.footer.ndaBadge}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-blue-400" />
-              <span>전 세계 50개 이상 주요 언어 지원</span>
+              <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+              <span>{t.footer.globalLangBadge}</span>
             </div>
           </div>
         </div>
@@ -45,90 +49,96 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           
           {/* Brand Info */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center">
-                <Globe className="w-5 h-5" />
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 p-[1px] shadow-xs">
+                <div className="w-full h-full bg-blue-600 rounded-[7px] flex items-center justify-center">
+                  <span className="text-white font-extrabold text-sm leading-none">T</span>
+                </div>
               </div>
-              <span className="text-xl font-extrabold text-white tracking-tight">
-                TRIX <span className="text-blue-500">Translate</span>
+              <span className="text-base font-bold text-slate-900 tracking-tight">
+                TRIX <span className="text-blue-600 font-semibold">Translate</span>
               </span>
             </div>
-            <p className="text-slate-300 font-semibold text-sm italic">
-              "언어의 한계를 넘어 글로벌 가치를 전달합니다."
+            <p className="text-slate-700 font-semibold text-xs">
+              "{t.footer.tagline}"
             </p>
-            <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              글로벌 비즈니스 및 개인 고객을 위한 전문 번역, 원어민 감수, 웹/앱 현지화 서비스를 제공하는 글로컬리제이션 전문 기관입니다.
+            <p className="text-slate-600 text-xs leading-relaxed max-w-sm">
+              {t.footer.description}
             </p>
           </div>
 
           {/* Quick Navigation Links */}
           <div>
-            <h5 className="text-white font-bold text-sm tracking-wider uppercase mb-4 text-slate-200">
-              메뉴
+            <h5 className="text-slate-900 font-bold text-xs tracking-wider uppercase mb-3">
+              {t.footer.quickLinks}
             </h5>
-            <ul className="space-y-2.5 text-sm">
+            <ul className="space-y-2 text-xs">
               <li>
                 <button 
                   onClick={() => handleNav('home')}
-                  className="hover:text-blue-400 transition-colors text-slate-300 cursor-pointer"
+                  className="hover:text-blue-600 transition-colors text-slate-600 cursor-pointer font-medium"
                 >
-                  홈 (Home)
+                  {t.nav.home}
                 </button>
               </li>
               <li>
                 <button 
                   onClick={() => handleNav('services')}
-                  className="hover:text-blue-400 transition-colors text-slate-300 cursor-pointer"
+                  className="hover:text-blue-600 transition-colors text-slate-600 cursor-pointer font-medium"
                 >
-                  서비스 안내 (Services)
+                  {t.nav.services}
                 </button>
               </li>
               <li>
                 <button 
                   onClick={() => handleNav('quote')}
-                  className="hover:text-blue-400 transition-colors text-slate-300 cursor-pointer"
+                  className="hover:text-blue-600 transition-colors text-slate-600 cursor-pointer font-medium"
                 >
-                  무료 견적 문의 (Free Quote)
+                  {t.nav.quote}
                 </button>
               </li>
               <li>
                 <button 
                   onClick={() => handleNav('faq')}
-                  className="hover:text-blue-400 transition-colors text-slate-300 cursor-pointer"
+                  className="hover:text-blue-600 transition-colors text-slate-600 cursor-pointer font-medium"
                 >
-                  자주 묻는 질문 (FAQ)
+                  {t.nav.faq}
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Services Quicklist */}
+          {/* Services List */}
           <div>
-            <h5 className="text-white font-bold text-sm tracking-wider uppercase mb-4 text-slate-200">
-              제공 서비스
+            <h5 className="text-slate-900 font-bold text-xs tracking-wider uppercase mb-3">
+              {t.footer.servicesTitle}
             </h5>
-            <ul className="space-y-2 text-xs text-slate-400">
-              <li>전문 문서 번역 (Document Translation)</li>
-              <li>원어민 감수 & 교정 (Proofreading)</li>
-              <li>소프트웨어 & 앱/웹 현지화 (Localization)</li>
-              <li>상품 상세페이지 & 이커머스 번역</li>
-              <li>기업 마케팅 & 홍보물 번역</li>
-              <li>다국어 엔터프라이즈 전략 컨설팅</li>
+            <ul className="space-y-2 text-xs text-slate-600 font-medium">
+              {t.services.items.map((s) => (
+                <li key={s.id}>
+                  <button 
+                    onClick={() => handleNav('services')}
+                    className="hover:text-blue-600 transition-colors text-left cursor-pointer"
+                  >
+                    {s.title}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
 
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-[10px] text-slate-400 font-medium uppercase tracking-widest gap-4">
+        <div className="mt-10 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-3">
           <div>
-            © 2026 TRIX Translate. All Rights Reserved.
+            {t.footer.rights}
           </div>
-          <div className="flex items-center gap-6">
-            <span className="hover:text-slate-300 cursor-pointer">개인정보 처리방침</span>
-            <span className="hover:text-slate-300 cursor-pointer">이용약관</span>
-            <span className="hover:text-slate-300 cursor-pointer">보안 및 품질 서약</span>
+          <div className="flex items-center gap-5">
+            <span className="hover:text-blue-600 transition-colors cursor-pointer">{t.footer.privacy}</span>
+            <span className="hover:text-blue-600 transition-colors cursor-pointer">{t.footer.terms}</span>
+            <span className="hover:text-blue-600 transition-colors cursor-pointer">{t.footer.security}</span>
           </div>
         </div>
       </div>

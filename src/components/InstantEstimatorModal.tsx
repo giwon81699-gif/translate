@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   X, 
   Sparkles, 
   ArrowRight, 
-  CheckCircle2, 
-  Clock
+  Clock 
 } from 'lucide-react';
 
 interface InstantEstimatorModalProps {
@@ -18,6 +18,7 @@ export const InstantEstimatorModal: React.FC<InstantEstimatorModalProps> = ({
   onClose,
   onApplyToQuote
 }) => {
+  const { t } = useLanguage();
   const [sampleText, setSampleText] = useState('');
   const [customWordCount, setCustomWordCount] = useState<number>(500);
   const [useTextCounter, setUseTextCounter] = useState(true);
@@ -31,7 +32,7 @@ export const InstantEstimatorModal: React.FC<InstantEstimatorModalProps> = ({
     : customWordCount;
 
   // Rate calculations
-  let ratePerWord = 0.12; // Base translation (~160 KRW / word)
+  let ratePerWord = 0.12;
   if (selectedService === 'proofreading') ratePerWord = 0.06;
   if (selectedService === 'localization') ratePerWord = 0.16;
   if (selectedService === 'product-detail') ratePerWord = 0.14;
@@ -42,16 +43,19 @@ export const InstantEstimatorModal: React.FC<InstantEstimatorModalProps> = ({
   const estimatedCostMinUSD = Math.max(35, Math.round(calculatedWords * ratePerWord * 0.95));
   const estimatedCostMaxUSD = Math.max(45, Math.round(calculatedWords * ratePerWord * 1.05));
 
-  // KRW Conversion (~1,350 KRW / USD)
   const estimatedCostMinKRW = (estimatedCostMinUSD * 1350).toLocaleString();
   const estimatedCostMaxKRW = (estimatedCostMaxUSD * 1350).toLocaleString();
 
-  // Turnaround calculation
-  let turnaround = '24시간 이내';
-  if (calculatedWords <= 1000) turnaround = urgency === 'express' ? '6~12시간 이내' : '24시간 이내';
-  else if (calculatedWords <= 3000) turnaround = urgency === 'express' ? '24시간 이내' : '1~2일 소요';
-  else if (calculatedWords <= 7000) turnaround = urgency === 'express' ? '2일 소요' : '3~4일 소요';
-  else turnaround = '프로젝트 별도 협의';
+  let turnaround = t.estimator.turnaroundOptions.under24h;
+  if (calculatedWords <= 1000) {
+    turnaround = urgency === 'express' ? t.estimator.turnaroundOptions.fast6to12h : t.estimator.turnaroundOptions.under24h;
+  } else if (calculatedWords <= 3000) {
+    turnaround = urgency === 'express' ? t.estimator.turnaroundOptions.under24h : t.estimator.turnaroundOptions.days1to2;
+  } else if (calculatedWords <= 7000) {
+    turnaround = urgency === 'express' ? t.estimator.turnaroundOptions.days2 : t.estimator.turnaroundOptions.days3to4;
+  } else {
+    turnaround = t.estimator.turnaroundOptions.customProject;
+  }
 
   const handleApply = () => {
     onApplyToQuote({
@@ -62,170 +66,188 @@ export const InstantEstimatorModal: React.FC<InstantEstimatorModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-fadeIn">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
+      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-slate-800">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-6 flex items-center justify-between">
+        <div className="bg-[#F8FAFC] p-5 sm:p-6 flex items-center justify-between border-b border-slate-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-blue-200" />
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shadow-xs">
+              <Sparkles className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-bold">실시간 단어수 & 예상 견적 계산기</h3>
-              <p className="text-xs text-blue-100">원문 텍스트를 붙여넣거나 단어수를 직접 입력해 예상 일정과 견적을 확인하세요</p>
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                {t.estimator.modalTitle}
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {t.estimator.modalSubtitle}
+              </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-5 sm:p-6 space-y-5 bg-white">
           
           {/* Mode Switcher */}
-          <div className="flex bg-slate-100 p-1 rounded-xl">
+          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs">
             <button
               onClick={() => setUseTextCounter(true)}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                useTextCounter ? 'bg-white text-blue-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`flex-1 py-2 font-bold rounded-lg transition-all cursor-pointer ${
+                useTextCounter ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              텍스트 붙여넣기 (자동 계산)
+              {t.estimator.textModeTab}
             </button>
             <button
               onClick={() => setUseTextCounter(false)}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                !useTextCounter ? 'bg-white text-blue-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`flex-1 py-2 font-bold rounded-lg transition-all cursor-pointer ${
+                !useTextCounter ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              단어수 직접 입력
+              {t.estimator.wordCountModeTab}
             </button>
           </div>
 
-          {/* Input Field */}
+          {/* Input Area */}
           {useTextCounter ? (
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-xs font-bold text-slate-700">샘플 텍스트 붙여넣기:</label>
-                <span className="text-xs font-mono font-bold text-blue-600">
-                  {calculatedWords} 단어
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-bold text-slate-700">{t.estimator.pasteLabel}</span>
+                <span className="font-mono text-blue-600 font-bold">
+                  {calculatedWords.toLocaleString()} {t.estimator.wordsDetected}
                 </span>
               </div>
               <textarea
-                rows={4}
-                placeholder="계산할 원문 텍스트를 이곳에 붙여넣으세요..."
+                rows={3}
+                placeholder={t.estimator.pastePlaceholder}
                 value={sampleText}
                 onChange={(e) => setSampleText(e.target.value)}
-                className="w-full p-3 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full p-3 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-sans transition-all"
               />
             </div>
           ) : (
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1.5">예상 총 단어수:</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  min={50}
-                  max={50000}
-                  step={50}
-                  value={customWordCount}
-                  onChange={(e) => setCustomWordCount(Math.max(0, Number(e.target.value)))}
-                  className="w-full p-3 border border-slate-300 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-                <span className="text-xs font-bold text-slate-500 uppercase">단어</span>
-              </div>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700">
+                {t.estimator.wordCountInputLabel}
+              </label>
+              <input
+                type="number"
+                min={50}
+                max={500000}
+                step={50}
+                value={customWordCount}
+                onChange={(e) => setCustomWordCount(Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 font-mono focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              />
             </div>
           )}
 
-          {/* Service & Speed Controls */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          {/* Service & Urgency selectors */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="font-bold text-slate-700 block mb-1.5">희망 번역 서비스:</label>
+              <label className="block font-bold text-slate-700 mb-1.5">
+                {t.estimator.serviceType}:
+              </label>
               <select
                 value={selectedService}
                 onChange={(e) => setSelectedService(e.target.value)}
-                className="w-full p-2.5 border border-slate-300 rounded-xl bg-white font-medium focus:outline-none"
+                className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               >
-                <option value="translation">전문 전문번역</option>
-                <option value="proofreading">원어민 감수 & 원문 교정</option>
-                <option value="localization">소프트웨어 & 모바일 앱 현지화</option>
-                <option value="product-detail">상품 상세페이지 번역</option>
-                <option value="business-marketing">마케팅 & 기업 홍보 번역</option>
+                <option value="translation">{t.estimator.serviceOptions.translation}</option>
+                <option value="proofreading">{t.estimator.serviceOptions.proofreading}</option>
+                <option value="localization">{t.estimator.serviceOptions.localization}</option>
+                <option value="product-detail">{t.estimator.serviceOptions.productDetail}</option>
+                <option value="business-marketing">{t.estimator.serviceOptions.businessMarketing}</option>
               </select>
             </div>
 
             <div>
-              <label className="font-bold text-slate-700 block mb-1.5">납기 옵션:</label>
+              <label className="block font-bold text-slate-700 mb-1.5">{t.estimator.deadlineLabel}</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
+                  type="button"
                   onClick={() => setUrgency('standard')}
-                  className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
+                  className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                     urgency === 'standard'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700 font-bold'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-xs'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                   }`}
                 >
-                  일반 납기
+                  {t.estimator.standardUrgency}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setUrgency('express')}
-                  className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
+                  className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                     urgency === 'express'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700 font-bold'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-xs'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                   }`}
                 >
-                  ⚡ 긴급 당일
+                  {t.estimator.expressUrgency}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Estimated Result Card */}
-          <div className="bg-slate-900 text-white p-5 rounded-xl border border-slate-800 space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-center border-b border-slate-800 pb-4">
+          {/* Result Card */}
+          <div className="p-4 rounded-xl bg-[#F8FAFF] border border-blue-200/90 space-y-3">
+            <div className="flex items-center justify-between text-xs border-b border-blue-100 pb-2">
+              <span className="font-bold text-slate-800">{t.estimator.calculatedEstimate}</span>
+              <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold">
+                {calculatedWords.toLocaleString()} words
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase block tracking-wider">예상 예상 견적 범위</span>
-                <span className="text-xl sm:text-2xl font-extrabold text-blue-400">
-                  약 ₩{estimatedCostMinKRW} ~ ₩{estimatedCostMaxKRW}
-                </span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">(${estimatedCostMinUSD} ~ ${estimatedCostMaxUSD} USD)</span>
+                <span className="text-[11px] text-slate-500 block mb-1">{t.estimator.estimatedCost}:</span>
+                <div className="text-xl font-extrabold text-slate-900 tracking-tight">
+                  ₩{estimatedCostMinKRW} ~ ₩{estimatedCostMaxKRW}
+                </div>
+                <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                  (${estimatedCostMinUSD} ~ ${estimatedCostMaxUSD} USD)
+                </div>
               </div>
+
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase block tracking-wider">예상 소요 시간</span>
-                <span className="text-xl sm:text-2xl font-extrabold text-emerald-400 flex items-center justify-center gap-1 mt-0.5">
-                  <Clock className="w-5 h-5 text-emerald-400" /> {turnaround}
-                </span>
+                <span className="text-[11px] text-slate-500 block mb-1">{t.estimator.estimatedTime}:</span>
+                <div className="text-sm font-bold text-blue-600 flex items-center gap-1.5 mt-1">
+                  <Clock className="w-4 h-4" />
+                  <span>{turnaround}</span>
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1">{t.estimator.businessDaysNote}</div>
               </div>
             </div>
 
-            <div className="text-[11px] text-slate-400 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0" />
-              <span>원어민 번역, 교정 감수, 전문 용어 집필, ISO 17100 품질검수가 모두 포함된 금액입니다.</span>
-            </div>
+            <p className="text-[10px] text-slate-500 border-t border-blue-100 pt-2 leading-normal">
+              {t.estimator.notice}
+            </p>
           </div>
 
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-between">
+        <div className="bg-[#F8FAFC] p-4 border-t border-slate-200 flex justify-between items-center">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-slate-600 hover:text-slate-900 text-xs font-semibold cursor-pointer"
+            className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 shadow-xs transition-colors cursor-pointer"
           >
-            취소
+            {t.estimator.closeBtn}
           </button>
 
           <button
             onClick={handleApply}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-blue-600/30 flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
           >
-            <span>이 내용으로 무료 견적 신청하기</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{t.estimator.applyBtn}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 

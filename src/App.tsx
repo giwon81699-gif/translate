@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PageType, QuoteRequest } from './types';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { QuoteTrackerModal } from './components/QuoteTrackerModal';
@@ -9,7 +10,7 @@ import { ServicesPage } from './pages/ServicesPage';
 import { FreeQuotePage } from './pages/FreeQuotePage';
 import { FAQPage } from './pages/FAQPage';
 
-export default function App() {
+function AppContent() {
   const [currentPage, setCurrentPage] = useState<PageType>('home');
   const [servicePreselect, setServicePreselect] = useState<string | undefined>();
   const [wordCountPrefill, setWordCountPrefill] = useState<number | undefined>();
@@ -25,7 +26,6 @@ export default function App() {
       console.error('Failed to parse saved quotes from localStorage', err);
     }
     return [
-      // Seed initial sample submitted quote so tracker demo is immediately viewable
       {
         id: 'TRIX-2026-8942',
         createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
@@ -87,9 +87,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white font-sans">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#F4F7FF] via-[#F8FAFC] to-white text-slate-900 selection:bg-blue-600 selection:text-white font-sans antialiased">
       
-      {/* Top Navbar */}
+      {/* Top Navbar with Language Dropdown & Windly Light Styling */}
       <Navbar
         currentPage={currentPage}
         onNavigate={handleNavigate}
@@ -102,6 +102,7 @@ export default function App() {
         {currentPage === 'home' && (
           <HomePage
             onNavigate={handleNavigate}
+            onOpenEstimator={() => setEstimatorOpen(true)}
           />
         )}
 
@@ -130,7 +131,7 @@ export default function App() {
       {/* Footer */}
       <Footer onNavigate={handleNavigate} />
 
-      {/* Quote Tracker Modal */}
+      {/* Quote Tracker Modal with Strict Privacy Verification & Masking */}
       <QuoteTrackerModal
         isOpen={trackerOpen}
         onClose={() => setTrackerOpen(false)}
@@ -145,5 +146,13 @@ export default function App() {
       />
 
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 }

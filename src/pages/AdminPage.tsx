@@ -25,7 +25,6 @@ import {
   Calendar, 
   Layers, 
   Save, 
-  ShieldCheck,
   ChevronDown
 } from 'lucide-react';
 
@@ -307,17 +306,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               <span>관리자 로그인 (Login)</span>
             </button>
           </form>
-
-          {/* Quick Test Hint */}
-          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
-            <div className="flex items-center gap-1.5 font-bold text-slate-800">
-              <ShieldCheck className="w-4 h-4 text-blue-600" />
-              <span>인증 안내</span>
-            </div>
-            <p className="text-[11px] text-slate-500">
-              테스트 비밀번호: <code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono text-blue-600 font-bold">trix2026!</code> 또는 <code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono text-blue-600 font-bold">admin1234</code>
-            </p>
-          </div>
 
           <div className="pt-2 text-center">
             <button

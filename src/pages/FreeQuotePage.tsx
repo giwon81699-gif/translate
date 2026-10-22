@@ -15,14 +15,35 @@ import {
   FileCheck,
   Mail,
   Send,
-  Sparkles
+  Sparkles,
+  Download,
+  AlertCircle,
+  ExternalLink,
+  Link2
 } from 'lucide-react';
 import { 
   sendQuoteEmail, 
   createMailtoLink, 
   TARGET_BUSINESS_EMAIL, 
-  EmailSendResult 
+  EmailSendResult,
+  formatFileSize
 } from '../services/emailService';
+
+export const ALLOWED_EXTENSIONS = [
+  'pdf',
+  'docx',
+  'doc',
+  'pptx',
+  'xlsx',
+  'txt',
+  'hwp',
+  'png',
+  'jpg',
+  'jpeg',
+  'zip'
+];
+export const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB total limit
+export const ACCEPT_FILE_ATTR = '.pdf,.docx,.doc,.pptx,.xlsx,.txt,.hwp,.png,.jpg,.jpeg,.zip';
 
 interface FreeQuotePageProps {
   initialServicePreselect?: string;
@@ -50,6 +71,8 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
   
   // File attachments state (Slots 1, 2, 3)
   const [files, setFiles] = useState<(AttachedFile | null)[]>([null, null, null]);
+  const [largeFileUrl, setLargeFileUrl] = useState('');
+  const [fileAlertMessage, setFileAlertMessage] = useState<string | null>(null);
 
   // Project details text
   const [projectDetails, setProjectDetails] = useState('');
@@ -91,10 +114,32 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
     }
   }, [initialServicePreselect, initialWordCount, t.quotePage.purposeOptions]);
 
-  // File upload change handler
+  // File upload change handler with strict security and size verification
   const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
+
+    // Reset previous alert
+    setFileAlertMessage(null);
+
+    // 1. Extension validation (.pdf, .docx, .doc, .pptx, .xlsx, .txt, .hwp, .png, .jpg, .jpeg, .zip only)
+    const ext = selected.name.split('.').pop()?.toLowerCase() || '';
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      setFileAlertMessage(t.quotePage.invalidFileFormat);
+      e.target.value = '';
+      return;
+    }
+
+    // 2. Capacity validation: single or total file size limit of 20MB
+    const otherFilesSize = files
+      .filter((f, i) => f !== null && i !== index)
+      .reduce((sum, f) => sum + (f?.size || 0), 0);
+
+    if (selected.size > MAX_FILE_SIZE_BYTES || (otherFilesSize + selected.size) > MAX_FILE_SIZE_BYTES) {
+      setFileAlertMessage(t.quotePage.fileSizeExceeded);
+      e.target.value = '';
+      return;
+    }
 
     const newFile: AttachedFile = {
       id: Math.random().toString(36).substring(2, 9),
@@ -104,28 +149,29 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
       uploadDate: new Date().toISOString()
     };
 
-    // If file is under 2.5MB, read data URL for base64 storage
-    if (selected.size <= 2.5 * 1024 * 1024) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        newFile.dataBase64 = reader.result as string;
-        setFiles(prev => {
-          const next = [...prev];
-          next[index] = { ...newFile };
-          return next;
-        });
-      };
-      reader.readAsDataURL(selected);
-    } else {
+    // Read file as base64 data URL for client storage and in-browser download
+    const reader = new FileReader();
+    reader.onload = () => {
+      newFile.dataBase64 = reader.result as string;
+      setFiles(prev => {
+        const next = [...prev];
+        next[index] = { ...newFile };
+        return next;
+      });
+    };
+    reader.onerror = () => {
       setFiles(prev => {
         const next = [...prev];
         next[index] = newFile;
         return next;
       });
-    }
+    };
+    reader.readAsDataURL(selected);
+    e.target.value = '';
   };
 
   const handleRemoveFile = (index: number) => {
+    setFileAlertMessage(null);
     setFiles(prev => {
       const next = [...prev];
       next[index] = null;
@@ -173,6 +219,7 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
       preferredDeadline: preferredDeadline || t.quotePage.deadlineOptions[0]?.label || 'Standard',
       translationPurpose: translationPurpose || t.quotePage.purposeOptions[0]?.label || 'General',
       files: activeFiles,
+      largeFileUrl: largeFileUrl.trim() || undefined,
       projectDetails,
       privacyAgreed,
       status: 'Under Review'
@@ -305,9 +352,23 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
               <div>• <strong>{t.quotePage.summaryScope}</strong>: {submittedQuote.preferredDeadline} / {submittedQuote.translationPurpose}</div>
               <div>
                 • <strong>{t.quotePage.summaryFiles}</strong>: {submittedQuote.files.length > 0 
-                  ? submittedQuote.files.map(f => `${f.name} (${(f.size / 1024).toFixed(1)}KB)`).join(', ') 
+                  ? submittedQuote.files.map(f => `${f.name} (${formatFileSize(f.size)})`).join(', ') 
                   : t.quotePage.summaryNoFiles}
               </div>
+              {submittedQuote.largeFileUrl && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  • <strong>{t.quotePage.summaryLargeFile}</strong>:
+                  <a
+                    href={submittedQuote.largeFileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-700 underline font-mono flex items-center gap-1 truncate max-w-xs"
+                  >
+                    <span>{submittedQuote.largeFileUrl}</span>
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                  </a>
+                </div>
+              )}
             </div>
 
             <div className="text-[11px] text-slate-500 leading-normal">
@@ -333,6 +394,8 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
                 setContactNumber('');
                 setProjectDetails('');
                 setFiles([null, null, null]);
+                setLargeFileUrl('');
+                setFileAlertMessage(null);
                 setPrivacyAgreed(false);
               }}
               className="px-5 py-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-sm font-semibold rounded-xl transition-all cursor-pointer shadow-xs"
@@ -511,6 +574,23 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
               <span>{t.quotePage.step4Title}</span>
             </h3>
 
+            {/* File Security & Size Alert Banner */}
+            {fileAlertMessage && (
+              <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-700 animate-fadeIn">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <div className="flex-1 leading-relaxed">
+                  <span className="font-semibold">{fileAlertMessage}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFileAlertMessage(null)}
+                  className="text-rose-400 hover:text-rose-600 p-0.5 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* File Slots */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
@@ -522,14 +602,14 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
                   return (
                     <div 
                       key={idx}
-                      className={`p-3 rounded-xl border flex flex-col justify-between min-h-[95px] relative transition-all ${
+                      className={`p-3 rounded-xl border flex flex-col justify-between min-h-[105px] relative transition-all ${
                         currentFile 
                           ? 'bg-white border-blue-200 shadow-xs'
                           : 'bg-slate-50/70 border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50/40'
                       }`}
                     >
                       {currentFile ? (
-                        <div className="space-y-1 overflow-hidden">
+                        <div className="space-y-1.5 overflow-hidden">
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                               {t.quotePage.attachedBadge}
@@ -543,7 +623,20 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
                             </button>
                           </div>
                           <p className="text-xs font-semibold text-slate-800 truncate">{currentFile.name}</p>
-                          <p className="text-[10px] text-slate-500 font-mono">{(currentFile.size / 1024).toFixed(1)} KB</p>
+                          <div className="flex items-center justify-between text-[10px]">
+                            <span className="text-slate-500 font-mono">{formatFileSize(currentFile.size)}</span>
+                            {currentFile.dataBase64 && (
+                              <a
+                                href={currentFile.dataBase64}
+                                download={currentFile.name}
+                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold hover:underline"
+                                title={t.quotePage.downloadFileBtn}
+                              >
+                                <Download className="w-3 h-3" />
+                                <span>{t.quotePage.downloadFileBtn}</span>
+                              </a>
+                            )}
+                          </div>
                         </div>
                       ) : (
                         <label className="flex flex-col items-center justify-center h-full cursor-pointer py-2">
@@ -552,6 +645,7 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
                           <span className="text-[10px] text-slate-400">{t.quotePage.clickToSelect}</span>
                           <input
                             type="file"
+                            accept={ACCEPT_FILE_ATTR}
                             onChange={(e) => handleFileChange(idx, e)}
                             className="hidden"
                           />
@@ -563,6 +657,30 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
               </div>
               <p className="text-[11px] text-slate-500 mt-1.5">
                 {t.quotePage.fileUploadHint}
+              </p>
+            </div>
+
+            {/* Large File External Share Link */}
+            <div className="pt-2">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-blue-600" />
+                  <span>{t.quotePage.largeFileUrlLabel}</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-normal">Google Drive, Dropbox, OneDrive</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="url"
+                  placeholder={t.quotePage.largeFileUrlPlaceholder}
+                  value={largeFileUrl}
+                  onChange={(e) => setLargeFileUrl(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50/70 border border-slate-300 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-xs"
+                />
+                <Link2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                {t.quotePage.largeFileUrlHint}
               </p>
             </div>
 

@@ -1,4 +1,4 @@
-export type PageType = 'home' | 'services' | 'quote' | 'faq';
+export type PageType = 'home' | 'services' | 'quote' | 'faq' | 'admin';
 
 export interface AttachedFile {
   id: string;
@@ -20,11 +20,13 @@ export interface QuoteRequest {
   preferredDeadline: string;
   translationPurpose: string;
   files: AttachedFile[];
+  largeFileUrl?: string;
   projectDetails: string;
   privacyAgreed: boolean;
   status: 'Received' | 'Under Review' | 'Quotation Sent' | 'In Progress' | 'Completed';
   estimatedWords?: number;
   estimatedTurnaround?: string;
+  adminNotes?: string;
 }
 
 export interface ServiceInfo {

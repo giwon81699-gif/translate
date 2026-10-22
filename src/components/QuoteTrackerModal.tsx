@@ -13,8 +13,12 @@ import {
   MessageSquare,
   ShieldCheck,
   Lock,
-  ArrowRight
+  ArrowRight,
+  Download,
+  ExternalLink,
+  Link2
 } from 'lucide-react';
+import { formatFileSize } from '../services/emailService';
 
 interface QuoteTrackerModalProps {
   isOpen: boolean;
@@ -378,20 +382,55 @@ export const QuoteTrackerModal: React.FC<QuoteTrackerModalProps> = ({
                 ) : (
                   <div className="space-y-2">
                     {selectedQuote.files.map((file, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200 text-xs shadow-xs">
-                        <div className="flex items-center gap-2 overflow-hidden">
+                      <div key={idx} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200 text-xs shadow-xs gap-3">
+                        <div className="flex items-center gap-2 overflow-hidden flex-1">
                           <FileText className="w-4 h-4 text-blue-600 shrink-0" />
                           <span className="font-semibold text-slate-800 truncate">{file.name}</span>
-                          <span className="text-[10px] text-slate-400 font-mono">({(file.size / 1024).toFixed(1)} KB)</span>
+                          <span className="text-[10px] text-slate-400 font-mono shrink-0">({formatFileSize(file.size)})</span>
                         </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">
-                          {t.tracker.storedBadge}
-                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {file.dataBase64 && (
+                            <a
+                              href={file.dataBase64}
+                              download={file.name}
+                              className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-md font-bold text-[10px] flex items-center gap-1 border border-blue-200 transition-colors"
+                              title={t.tracker.downloadFileBtn}
+                            >
+                              <Download className="w-3 h-3" />
+                              <span>{t.tracker.downloadFileBtn}</span>
+                            </a>
+                          )}
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">
+                            {t.tracker.storedBadge}
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
+
+              {/* Large File External Share Link */}
+              {selectedQuote.largeFileUrl && (
+                <div className="p-4 bg-blue-50/60 border border-blue-200 rounded-xl space-y-2 text-xs">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <Link2 className="w-3.5 h-3.5 text-blue-600" />
+                    <span>{t.tracker.largeFileTitle}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 bg-white p-3 rounded-lg border border-blue-200 text-xs">
+                    <span className="truncate font-mono text-slate-700">{selectedQuote.largeFileUrl}</span>
+                    <a
+                      href={selectedQuote.largeFileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shrink-0 transition-colors shadow-xs"
+                    >
+                      <span>{t.tracker.downloadFileBtn}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Project Requirements */}
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">

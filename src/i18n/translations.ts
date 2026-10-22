@@ -154,6 +154,8 @@ export interface Translations {
     copiedBtn: string;
     emptyStateTitle: string;
     emptyStateDesc: string;
+    downloadFileBtn: string;
+    largeFileTitle: string;
   };
   quotePage: {
     badge: string;
@@ -177,6 +179,12 @@ export interface Translations {
     attachedBadge: string;
     projectDetailsLabel: string;
     projectDetailsPlaceholder: string;
+    largeFileUrlLabel: string;
+    largeFileUrlPlaceholder: string;
+    largeFileUrlHint: string;
+    invalidFileFormat: string;
+    fileSizeExceeded: string;
+    downloadFileBtn: string;
     step4Title: string;
     clientName: string;
     namePlaceholder: string;
@@ -204,6 +212,7 @@ export interface Translations {
     summaryScope: string;
     summaryFiles: string;
     summaryNoFiles: string;
+    summaryLargeFile: string;
     trackerNotice: string;
     purposeOptions: { value: string; label: string }[];
     deadlineOptions: { value: string; label: string }[];
@@ -536,7 +545,9 @@ export const translations: Record<Language, Translations> = {
       copyBtn: '복사',
       copiedBtn: '복사됨',
       emptyStateTitle: '접수 번호를 입력하여 견적 진행 상황을 확인하세요',
-      emptyStateDesc: 'TRIX Translate는 고객님의 소중한 기밀 문서와 개인정보를 보호하기 위해, 브라우저에 과거 이력을 일괄 노출하지 않고 고유 접수 번호 단일 검증 방식을 엄격히 적용하고 있습니다.'
+      emptyStateDesc: 'TRIX Translate는 고객님의 소중한 기밀 문서와 개인정보를 보호하기 위해, 브라우저에 과거 이력을 일괄 노출하지 않고 고유 접수 번호 단일 검증 방식을 엄격히 적용하고 있습니다.',
+      downloadFileBtn: '다운로드',
+      largeFileTitle: '대용량 파일 공유 링크'
     },
     quotePage: {
       badge: '비즈니스 무료 견적',
@@ -554,12 +565,18 @@ export const translations: Record<Language, Translations> = {
       preferredDeadline: '희망 납기 일정',
       step3Title: '서비스 분야 및 납기 선택',
       fileUploadTitle: '번역 대상 문서 첨부 (최대 3개)',
-      fileUploadHint: 'DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, 이미지 등 모든 포맷을 지원합니다. (슬롯당 최대 25MB)',
+      fileUploadHint: 'DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, 이미지(PNG/JPG) 형식을 지원합니다. (총 용량 최대 20MB)',
       fileSlotLabel: '파일 추가',
       clickToSelect: '클릭하여 선택',
       attachedBadge: '첨부됨',
       projectDetailsLabel: '프로젝트 세부 요청사항 (선택 사항)',
       projectDetailsPlaceholder: '문서 배경 설명, 특정 전문 용어 선호사항, 타겟 독자층, 서식 유지 요구사항 등을 자유롭게 기재해 주세요...',
+      largeFileUrlLabel: '대용량 파일 공유 링크 (선택)',
+      largeFileUrlPlaceholder: '구글 드라이브, Dropbox, OneDrive 등 대용량 파일 공유 링크를 입력해 주세요.',
+      largeFileUrlHint: '20MB를 초과하는 대용량 문서나 압축 폴더는 클라우드 공유 링크를 남겨주시면 안전하게 확인합니다.',
+      invalidFileFormat: '허용되지 않는 파일 형식입니다. (.pdf, .docx, .doc, .pptx, .xlsx, .txt, .hwp, .png, .jpg, .jpeg, .zip 형식만 업로드 가능)',
+      fileSizeExceeded: '파일 용량이 20MB를 초과합니다. 대용량 파일은 아래 외부 링크 입력란을 이용하시거나 contact@trixtranslate.com으로 직접 전달해 주세요.',
+      downloadFileBtn: '다운로드 / 열람',
       step4Title: '문서 첨부 및 요청사항',
       clientName: '성함 또는 기업명',
       namePlaceholder: '예: 홍길동 / (주)글로벌트레이딩',
@@ -587,6 +604,7 @@ export const translations: Record<Language, Translations> = {
       summaryScope: '납기/분야',
       summaryFiles: '첨부파일',
       summaryNoFiles: '없음',
+      summaryLargeFile: '대용량 공유 링크',
       trackerNotice: '발급된 고유 접수 번호를 상단 메뉴의 [신청 내역 조회]에 입력하시면 실시간 진행 상황을 언제든 안전하게 확인하실 수 있습니다.',
       purposeOptions: [
         { value: '전문 문서 번역 (계약서 / 비즈니스 / 기술)', label: '전문 문서 번역 (계약서 / 비즈니스 / 기술)' },
@@ -986,7 +1004,9 @@ export const translations: Record<Language, Translations> = {
       copyBtn: 'Copy',
       copiedBtn: 'Copied',
       emptyStateTitle: 'Enter your Reference ID to check quote progress',
-      emptyStateDesc: 'To uphold strict privacy and NDA safeguards, TRIX Translate never exposes general browser history and requires individual Reference ID validation.'
+      emptyStateDesc: 'To uphold strict privacy and NDA safeguards, TRIX Translate never exposes general browser history and requires individual Reference ID validation.',
+      downloadFileBtn: 'Download',
+      largeFileTitle: 'Large File Share Link'
     },
     quotePage: {
       badge: 'B2B Free Quote',
@@ -1004,12 +1024,18 @@ export const translations: Record<Language, Translations> = {
       preferredDeadline: 'Preferred Turnaround',
       step3Title: 'Scope & Turnaround Preferences',
       fileUploadTitle: 'Attach Documents (Up to 3 files)',
-      fileUploadHint: 'Supports DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, Images, etc. (Max 25MB per slot)',
+      fileUploadHint: 'Supports DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, Images (PNG/JPG). (Max 20MB total size)',
       fileSlotLabel: 'Add File',
       clickToSelect: 'Click to browse',
       attachedBadge: 'Attached',
       projectDetailsLabel: 'Project Notes & Specific Instructions (Optional)',
       projectDetailsPlaceholder: 'Include target audience context, preferred terminology, formatting guidelines, or special delivery notes...',
+      largeFileUrlLabel: 'Large File Share Link (Optional)',
+      largeFileUrlPlaceholder: 'Paste Google Drive, Dropbox, OneDrive, or cloud download URL here...',
+      largeFileUrlHint: 'For files or archives exceeding 20MB, provide a cloud storage share link for seamless access.',
+      invalidFileFormat: 'Unsupported file type. (Only .pdf, .docx, .doc, .pptx, .xlsx, .txt, .hwp, .png, .jpg, .jpeg, .zip are permitted)',
+      fileSizeExceeded: 'File size exceeds 20MB limit. For large files, please provide an external share link below or email contact@trixtranslate.com directly.',
+      downloadFileBtn: 'Download / View',
       step4Title: 'Document Upload & Details',
       clientName: 'Name or Organization',
       namePlaceholder: 'e.g. John Doe / Acme Global Corp',
@@ -1037,6 +1063,7 @@ export const translations: Record<Language, Translations> = {
       summaryScope: 'Turnaround/Purpose',
       summaryFiles: 'Files',
       summaryNoFiles: 'None',
+      summaryLargeFile: 'Large File Link',
       trackerNotice: 'Save this Reference ID. You can enter it in the top [Track Quote] tool at any time to monitor real-time project progress.',
       purposeOptions: [
         { value: '전문 문서 번역 (계약서 / 비즈니스 / 기술)', label: 'Professional Document (Contracts / Business / Technical)' },
@@ -1436,7 +1463,9 @@ export const translations: Record<Language, Translations> = {
       copyBtn: 'コピー',
       copiedBtn: '完了',
       emptyStateTitle: '受付番号を入力して見積り進行状況を確認してください',
-      emptyStateDesc: 'TRIX Translateではお客様の大切な機密文書および個人情報を保護するため、ブラウザに過去の履歴を一括表示せず、個別受付番号による単一認証方式を徹底しています。'
+      emptyStateDesc: 'TRIX Translateではお客様の大切な機密文書および個人情報を保護するため、ブラウザに過去の履歴を一括表示せず、個別受付番号による単一認証方式を徹底しています。',
+      downloadFileBtn: 'ダウンロード',
+      largeFileTitle: '大容量ファイル共有リンク'
     },
     quotePage: {
       badge: '法人・個人向け無料見積り',
@@ -1454,12 +1483,18 @@ export const translations: Record<Language, Translations> = {
       preferredDeadline: 'ご希望の納期',
       step3Title: 'サービス内容と納期の設定',
       fileUploadTitle: '翻訳対象ファイルの添付 (最大3件)',
-      fileUploadHint: 'DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, 画像など全形式に対応 (1枠あたり最大25MB)',
+      fileUploadHint: 'DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, 画像(PNG/JPG)に対応 (合計最大20MB)',
       fileSlotLabel: 'ファイル追加',
       clickToSelect: 'クリックして選択',
       attachedBadge: '添付済み',
       projectDetailsLabel: 'プロジェクトの詳細・ご要望 (任意)',
       projectDetailsPlaceholder: '読者層、希望する用語集、スタイル、レイアウト維持の要件などをご自由に入力してください...',
+      largeFileUrlLabel: '大容量ファイル共有リンク (任意)',
+      largeFileUrlPlaceholder: 'Googleドライブ、Dropbox、OneDrive等の共有URLをご入力ください。',
+      largeFileUrlHint: '20MBを超える大容量ファイルやフォルダは、クラウド共有リンクをご記入いただくと安全に確認可能です。',
+      invalidFileFormat: '許可されていないファイル形式です。 (.pdf, .docx, .doc, .pptx, .xlsx, .txt, .hwp, .png, .jpg, .jpeg, .zip 形式のみ対応)',
+      fileSizeExceeded: 'ファイルサイズが20MBを超えています。大容量ファイルは下記の外部分由リンク欄をご利用いただくか、contact@trixtranslate.comまで直接お送りください。',
+      downloadFileBtn: 'ダウンロード / 閲覧',
       step4Title: '原稿添付とご要望の入力',
       clientName: 'お名前または貴社名',
       namePlaceholder: '例: 山田 太郎 / グローバルトレーディング株式会社',
@@ -1487,6 +1522,7 @@ export const translations: Record<Language, Translations> = {
       summaryScope: '納期・分野',
       summaryFiles: '添付ファイル',
       summaryNoFiles: 'なし',
+      summaryLargeFile: '大容量リンク',
       trackerNotice: '表示された専用受付番号を控えておくと、画面上部の［申請状況の確認］からリアルタイムに進捗を確認できます。',
       purposeOptions: [
         { value: '전문 문서 번역 (계약서 / 비즈니스 / 기술)', label: '専門文書翻訳 (契約書 / ビジネス / 技術)' },
@@ -1886,7 +1922,9 @@ export const translations: Record<Language, Translations> = {
       copyBtn: '复制',
       copiedBtn: '已复制',
       emptyStateTitle: '请输入受理编号查询报价与进度',
-      emptyStateDesc: '为严格保护客户的商业机密与个人隐私，TRIX Translate 不在浏览器端暴露任何历史列表，全面采取受理编号单次鉴权验证机制。'
+      emptyStateDesc: '为严格保护客户的商业机密与个人隐私，TRIX Translate 不在浏览器端暴露任何历史列表，全面采取受理编号单次鉴权验证机制。',
+      downloadFileBtn: '下载',
+      largeFileTitle: '大文件共享链接'
     },
     quotePage: {
       badge: '企业级免费报价',
@@ -1904,12 +1942,18 @@ export const translations: Record<Language, Translations> = {
       preferredDeadline: '期望交付时间',
       step3Title: '服务范围与交付排期',
       fileUploadTitle: '上传翻译文档 (最多3个)',
-      fileUploadHint: '支持 DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, 图片等全格式 (单个文件限25MB)',
+      fileUploadHint: '支持 DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, 图片(PNG/JPG)格式 (总大小限20MB)',
       fileSlotLabel: '添加文件',
       clickToSelect: '点击浏览选择',
       attachedBadge: '已上传',
       projectDetailsLabel: '项目背景与特殊要求 (选填)',
       projectDetailsPlaceholder: '可注明目标读者群体、特定术语表要求、排版保留规范或特殊加急说明...',
+      largeFileUrlLabel: '大文件共享链接 (选填)',
+      largeFileUrlPlaceholder: '请输入 Google Drive、Dropbox、OneDrive 等云盘下载链接...',
+      largeFileUrlHint: '超过20MB的大文件或压缩包，请提供云盘共享链接，以便我们安全查阅。',
+      invalidFileFormat: '不支持的文件类型。（仅支持 .pdf, .docx, .doc, .pptx, .xlsx, .txt, .hwp, .png, .jpg, .jpeg, .zip 格式）',
+      fileSizeExceeded: '文件大小超过20MB限制。大文件请在下方外部链接栏填写，或直接发送至 contact@trixtranslate.com。',
+      downloadFileBtn: '下载 / 预览',
       step4Title: '文档上传与项目说明',
       clientName: '姓名或企业名称',
       namePlaceholder: '例如: 张先生 / 环球进出口有限公司',
@@ -1937,6 +1981,7 @@ export const translations: Record<Language, Translations> = {
       summaryScope: '周期/领域',
       summaryFiles: '上传附件',
       summaryNoFiles: '无',
+      summaryLargeFile: '大文件链接',
       trackerNotice: '请妥善保存此受理编号。您可以随时在顶部导航栏的【查询申请进度】中实时追踪项目状态。',
       purposeOptions: [
         { value: '전문 문서 번역 (계약서 / 비즈니스 / 기술)', label: '专业文档翻译 (商务合同 / 技术手册 / 金融)' },
@@ -2336,7 +2381,9 @@ export const translations: Record<Language, Translations> = {
       copyBtn: 'Copiar',
       copiedBtn: 'Copiado',
       emptyStateTitle: 'Ingrese su código de referencia para conocer el avance',
-      emptyStateDesc: 'Para salvaguardar la estricta privacidad de sus documentos y datos, TRIX Translate no muestra listas globales en el navegador y exige la verificación individual por código.'
+      emptyStateDesc: 'Para salvaguardar la estricta privacidad de sus documentos y datos, TRIX Translate no muestra listas globales en el navegador y exige la verificación individual por código.',
+      downloadFileBtn: 'Descargar',
+      largeFileTitle: 'Enlace de archivo pesado'
     },
     quotePage: {
       badge: 'Cotización Gratuita para Empresas',
@@ -2354,12 +2401,18 @@ export const translations: Record<Language, Translations> = {
       preferredDeadline: 'Plazo de Entrega Preferido',
       step3Title: 'Alcance del Servicio y Plazo',
       fileUploadTitle: 'Adjuntar Documentos a Traducir (Hasta 3 archivos)',
-      fileUploadHint: 'Admite DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, imágenes, etc. (Máx. 25MB por archivo)',
+      fileUploadHint: 'Admite DOCX, PDF, XLSX, PPTX, HWP, TXT, ZIP, imágenes (PNG/JPG). (Límite total de 20MB)',
       fileSlotLabel: 'Añadir Archivo',
       clickToSelect: 'Haga clic para buscar',
       attachedBadge: 'Adjuntado',
       projectDetailsLabel: 'Notas e Instrucciones Específicas (Opcional)',
       projectDetailsPlaceholder: 'Describa el público objetivo, glosarios preferidos, requisitos de diseño o fechas límite concretas...',
+      largeFileUrlLabel: 'Enlace para archivos grandes (Opcional)',
+      largeFileUrlPlaceholder: 'Pegue el enlace de Google Drive, Dropbox, OneDrive, etc...',
+      largeFileUrlHint: 'Para archivos o carpetas de más de 20MB, proporcione un enlace de almacenamiento en la nube.',
+      invalidFileFormat: 'Formato de archivo no permitido. (Solo se admiten .pdf, .docx, .doc, .pptx, .xlsx, .txt, .hwp, .png, .jpg, .jpeg, .zip)',
+      fileSizeExceeded: 'El archivo supera el límite de 20MB. Para archivos grandes, use el enlace externo o envíelo a contact@trixtranslate.com.',
+      downloadFileBtn: 'Descargar / Ver',
       step4Title: 'Adjuntos y Especificaciones',
       clientName: 'Nombre o Razón Social',
       namePlaceholder: 'Ej: Carlos García / Global Commerce S.L.',
@@ -2387,6 +2440,7 @@ export const translations: Record<Language, Translations> = {
       summaryScope: 'Plazo/Propósito',
       summaryFiles: 'Adjuntos',
       summaryNoFiles: 'Ninguno',
+      summaryLargeFile: 'Enlace de archivo',
       trackerNotice: 'Guarde este código. Podrá ingresarlo en la opción superior [Consultar Estado] en cualquier momento para seguir el progreso de su proyecto.',
       purposeOptions: [
         { value: '전문 문서 번역 (계약서 / 비즈니스 / 기술)', label: 'Documentos Profesionales (Contratos / Negocios / Técnica)' },

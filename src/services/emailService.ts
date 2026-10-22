@@ -16,13 +16,28 @@ export const TARGET_BUSINESS_EMAIL =
  * Builds a structured, beautifully formatted plain-text email summary
  * suitable for inclusion in {{message}} or email bodies.
  */
+export function formatFileSize(bytes: number): string {
+  if (bytes >= 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  }
+  return `${(bytes / 1024).toFixed(1)} KB`;
+}
+
+/**
+ * Builds a structured, beautifully formatted plain-text email summary
+ * suitable for inclusion in {{message}} or email bodies.
+ */
 export function buildQuoteEmailBody(quote: QuoteRequest): string {
   const fileLines =
     quote.files && quote.files.length > 0
       ? quote.files
-          .map((f, i) => `  ${i + 1}. ${f.name} (${(f.size / 1024).toFixed(1)} KB / ${f.type || '파일'})`)
+          .map((f, i) => `  ${i + 1}. [첨부파일] ${f.name} (${formatFileSize(f.size)} / ${f.type || '파일'})`)
           .join('\n')
-      : '  - 첨부파일 없음';
+      : '  - 직접 첨부파일 없음';
+
+  const largeFileSection = quote.largeFileUrl?.trim()
+    ? `\n  • 대용량 파일 다운로드/공유 링크: ${quote.largeFileUrl.trim()}`
+    : '';
 
   return `========================================
 [TRIX TRANSLATE] 신규 번역 견적 문의 접수
@@ -47,9 +62,10 @@ export function buildQuoteEmailBody(quote: QuoteRequest): string {
 • 번역 분야 / 목적   : ${quote.translationPurpose}
 
 ----------------------------------------
-3. 첨부 파일 정보 (${quote.files?.length || 0}개)
+3. 첨부 파일 및 다운로드 정보 (${quote.files?.length || 0}개)
 ----------------------------------------
-${fileLines}
+${fileLines}${largeFileSection}
+  ※ 웹사이트 상단 [신청 내역 조회]에서 접수번호 '${quote.id}'를 입력하시면 첨부파일 원본 열람/다운로드가 안전하게 가능합니다.
 
 ----------------------------------------
 4. 세부 요청사항
@@ -63,6 +79,28 @@ ${quote.projectDetails?.trim() ? quote.projectDetails.trim() : '(작성된 세�
 }
 
 /**
+ * Builds a clean, non-corrupted text & link summary for {{files_summary}} variable.
+ */
+export function buildFilesSummary(quote: QuoteRequest): string {
+  const lines: string[] = [];
+
+  if (quote.files && quote.files.length > 0) {
+    quote.files.forEach((f, i) => {
+      lines.push(`• [첨부 ${i + 1}] ${f.name} (${formatFileSize(f.size)})`);
+    });
+    lines.push(`  → 접수번호 [${quote.id}]로 사이트에서 원본 열람/다운로드 보관됨`);
+  } else {
+    lines.push('• 첨부파일: 없음');
+  }
+
+  if (quote.largeFileUrl && quote.largeFileUrl.trim()) {
+    lines.push(`• [대용량 파일 다운로드 링크] ${quote.largeFileUrl.trim()}`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
  * Sends the submitted quote request to the business email (contact@trixtranslate.com)
  * via EmailJS. If EmailJS environment variables are not yet configured,
  * it safely logs the submission and provides a demo fallback so that the submission
@@ -73,11 +111,7 @@ export async function sendQuoteEmail(quote: QuoteRequest): Promise<EmailSendResu
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-  const filesSummary =
-    quote.files && quote.files.length > 0
-      ? quote.files.map((f) => `${f.name} (${(f.size / 1024).toFixed(1)} KB)`).join(', ')
-      : '첨부파일 없음';
-
+  const filesSummary = buildFilesSummary(quote);
   const fullEmailBody = buildQuoteEmailBody(quote);
 
   // Template parameters for EmailJS
@@ -85,7 +119,7 @@ export async function sendQuoteEmail(quote: QuoteRequest): Promise<EmailSendResu
   // {{to_email}}, {{from_name}}, {{from_email}}, {{contact_number}},
   // {{quote_id}}, {{source_language}}, {{target_language}},
   // {{preferred_deadline}}, {{translation_purpose}}, {{files_summary}},
-  // {{project_details}}, {{created_at}}, {{message}}
+  // {{large_file_url}}, {{files_count}}, {{project_details}}, {{created_at}}, {{message}}
   const templateParams: Record<string, unknown> = {
     to_email: TARGET_BUSINESS_EMAIL,
     from_name: quote.name,
@@ -97,6 +131,8 @@ export async function sendQuoteEmail(quote: QuoteRequest): Promise<EmailSendResu
     preferred_deadline: quote.preferredDeadline,
     translation_purpose: quote.translationPurpose,
     files_summary: filesSummary,
+    large_file_url: quote.largeFileUrl || '없음',
+    files_count: quote.files?.length || 0,
     project_details: quote.projectDetails || '세부 요청사항 없음',
     created_at: new Date(quote.createdAt).toLocaleString('ko-KR'),
     message: fullEmailBody

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { QuoteRequest, AttachedFile } from '../types';
 import { LANGUAGES_LIST } from '../data/mockData';
 import { useLanguage } from '../context/LanguageContext';
@@ -19,7 +19,13 @@ import {
   Download,
   AlertCircle,
   ExternalLink,
-  Link2
+  Link2,
+  Languages,
+  ShoppingBag,
+  FileCheck2,
+  Globe2,
+  Megaphone,
+  Layers
 } from 'lucide-react';
 import { 
   sendQuoteEmail, 
@@ -45,6 +51,110 @@ export const ALLOWED_EXTENSIONS = [
 export const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB total limit
 export const ACCEPT_FILE_ATTR = '.pdf,.docx,.doc,.pptx,.xlsx,.txt,.hwp,.png,.jpg,.jpeg,.zip';
 
+export type QuoteServiceCategory = 
+  | 'translation' 
+  | 'product-detail' 
+  | 'proofreading' 
+  | 'localization' 
+  | 'business-marketing' 
+  | 'multilingual-content';
+
+export function resolveServiceCategory(identifier?: string): QuoteServiceCategory {
+  if (!identifier) return 'translation';
+  const lower = identifier.toLowerCase().trim();
+
+  // 1. Exact ID checks
+  if (lower === 'translation') return 'translation';
+  if (lower === 'product-detail' || lower === 'product_detail') return 'product-detail';
+  if (lower === 'proofreading') return 'proofreading';
+  if (lower === 'localization') return 'localization';
+  if (lower === 'business-marketing' || lower === 'business_marketing' || lower === 'marketing') return 'business-marketing';
+  if (lower === 'multilingual-content' || lower === 'multilingual_content' || lower === 'pipeline') return 'multilingual-content';
+
+  // 2. Keyword checks
+  if (lower.includes('상세페이지') || lower.includes('commerce') || lower.includes('detail') || lower.includes('詳細') || lower.includes('详情') || lower.includes('ficha')) {
+    return 'product-detail';
+  }
+  if (lower.includes('소프트웨어') || lower.includes('앱') || lower.includes('ui/ux') || lower.includes('localization') || lower.includes('ローカライズ') || lower.includes('本地化') || lower.includes('localización')) {
+    return 'localization';
+  }
+  if (lower.includes('감수') || lower.includes('검수') || lower.includes('교정') || lower.includes('proofreading') || lower.includes('cvr') || lower.includes('校正') || lower.includes('审校') || lower.includes('corrección')) {
+    return 'proofreading';
+  }
+  if (lower.includes('마케팅') || lower.includes('비즈니스') || lower.includes('트랜스크리에이션') || lower.includes('business') || lower.includes('marketing') || lower.includes('transcreation') || lower.includes('营销')) {
+    return 'business-marketing';
+  }
+  if (lower.includes('파이프라인') || lower.includes('통합') || lower.includes('자막') || lower.includes('pipeline') || lower.includes('콘텐츠') || lower.includes('multilingual') || lower.includes('パイプライン') || lower.includes('管线')) {
+    return 'multilingual-content';
+  }
+
+  return 'translation';
+}
+
+export function findPurposeForCategory(
+  cat: QuoteServiceCategory,
+  options: { value: string; label: string }[]
+): { value: string; label: string } | undefined {
+  if (!options || options.length === 0) return undefined;
+  
+  if (cat === 'product-detail') {
+    return options.find(p => 
+      p.value.includes('상세페이지') ||
+      p.value.includes('이커머스') ||
+      p.value.toLowerCase().includes('commerce') ||
+      p.value.toLowerCase().includes('detail') ||
+      p.value.includes('詳細') ||
+      p.value.includes('详情') ||
+      p.value.toLowerCase().includes('ficha')
+    ) || options[1] || options[0];
+  }
+  if (cat === 'localization') {
+    return options.find(p => 
+      p.value.includes('소프트웨어') ||
+      p.value.includes('현지화') ||
+      p.value.toLowerCase().includes('ui/ux') ||
+      p.value.toLowerCase().includes('localization') ||
+      p.value.includes('ローカライズ') ||
+      p.value.includes('本地化') ||
+      p.value.toLowerCase().includes('localización')
+    ) || options[2] || options[0];
+  }
+  if (cat === 'proofreading') {
+    return options.find(p => 
+      p.value.includes('감수') ||
+      p.value.includes('교정') ||
+      p.value.toLowerCase().includes('proofreading') ||
+      p.value.includes('校正') ||
+      p.value.includes('审校') ||
+      p.value.toLowerCase().includes('revisión') ||
+      p.value.toLowerCase().includes('corrección')
+    ) || options[3] || options[0];
+  }
+  if (cat === 'business-marketing') {
+    return options.find(p => 
+      p.value.includes('마케팅') ||
+      p.value.includes('트랜스크리에이션') ||
+      p.value.toLowerCase().includes('marketing') ||
+      p.value.toLowerCase().includes('transcreation') ||
+      p.value.includes('营销')
+    ) || options[4] || options[0];
+  }
+  if (cat === 'multilingual-content') {
+    return options.find(p => 
+      p.value.includes('파이프라인') ||
+      p.value.includes('콘텐츠') ||
+      p.value.toLowerCase().includes('pipeline') ||
+      p.value.includes('パイプライン') ||
+      p.value.includes('管线')
+    ) || options[5] || options[0];
+  }
+  return options.find(p => 
+    p.value.includes('전문 문서') ||
+    p.value.toLowerCase().includes('translation') ||
+    p.value.toLowerCase().includes('document')
+  ) || options[0];
+}
+
 interface FreeQuotePageProps {
   initialServicePreselect?: string;
   initialWordCount?: number;
@@ -59,6 +169,11 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
   onOpenTracker
 }) => {
   const { t } = useLanguage();
+
+  // Active landing service category
+  const [activeCategory, setActiveCategory] = useState<QuoteServiceCategory>(() =>
+    resolveServiceCategory(initialServicePreselect)
+  );
 
   // Form fields state
   const [name, setName] = useState('');
@@ -89,30 +204,120 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
   const [emailStatus, setEmailStatus] = useState<EmailSendResult | null>(null);
   const [copiedId, setCopiedId] = useState(false);
 
-  // Keep defaults aligned with active language options
+  // Keep defaults and active category aligned with language options and preselection
   useEffect(() => {
-    if (t.quotePage.purposeOptions.length > 0 && !translationPurpose) {
-      setTranslationPurpose(t.quotePage.purposeOptions[0].label);
+    if (initialServicePreselect) {
+      const cat = resolveServiceCategory(initialServicePreselect);
+      setActiveCategory(cat);
+      const match = findPurposeForCategory(cat, t.quotePage.purposeOptions);
+      if (match) {
+        setTranslationPurpose(match.label);
+      }
+    } else if (t.quotePage.purposeOptions.length > 0 && !translationPurpose) {
+      const match = findPurposeForCategory(activeCategory, t.quotePage.purposeOptions);
+      setTranslationPurpose(match ? match.label : t.quotePage.purposeOptions[0].label);
     }
+
     if (t.quotePage.deadlineOptions.length > 0 && !preferredDeadline) {
       setPreferredDeadline(t.quotePage.deadlineOptions[0].label);
     }
-  }, [t.quotePage.purposeOptions, t.quotePage.deadlineOptions, translationPurpose, preferredDeadline]);
+  }, [initialServicePreselect, t.quotePage.purposeOptions, t.quotePage.deadlineOptions]);
 
-  // Initialize service preselect or initial word count if passed
   useEffect(() => {
-    if (initialServicePreselect) {
-      const match = t.quotePage.purposeOptions.find(p => p.value.includes(initialServicePreselect));
-      if (match) {
-        setTranslationPurpose(match.label);
-      } else if (t.quotePage.purposeOptions[0]) {
-        setTranslationPurpose(t.quotePage.purposeOptions[0].label);
-      }
-    }
     if (initialWordCount) {
       setProjectDetails(`[Word Count Estimate: ${initialWordCount} words]\n`);
     }
-  }, [initialServicePreselect, initialWordCount, t.quotePage.purposeOptions]);
+  }, [initialWordCount]);
+
+  const handleSelectCategory = (cat: QuoteServiceCategory) => {
+    setActiveCategory(cat);
+    const match = findPurposeForCategory(cat, t.quotePage.purposeOptions);
+    if (match) {
+      setTranslationPurpose(match.label);
+    }
+  };
+
+  // Dynamic headlines for selected service landing page (All 6 services 1:1 mapped)
+  const activeHeadline = useMemo(() => {
+    switch (activeCategory) {
+      case 'product-detail':
+        return {
+          title: t.quotePage.serviceHeadlines?.productDetail?.title || '현지 소비자의 구매를 부르는 상세페이지 기획·현지화 견적 문의',
+          subtitle: t.quotePage.serviceHeadlines?.productDetail?.subtitle || '어색한 직번역을 넘어, 현지 이커머스 생태계와 타깃 고객의 심리를 반영한 맞춤형 카피라이팅 및 디자인을 제공합니다.',
+          badge: t.quotePage.serviceHeadlines?.productDetail?.badge || '이커머스 CVR 극대화 현지화'
+        };
+      case 'proofreading':
+        return {
+          title: t.quotePage.serviceHeadlines?.proofreading?.title || '브랜드 신뢰도를 높이는 원어민 전문 감수 및 CVR 개선 문의',
+          subtitle: t.quotePage.serviceHeadlines?.proofreading?.subtitle || '네이티브 톤앤매너 검수를 통해 어색한 표현을 바로잡고, 해외 시장에서의 브랜드 완성도를 완성해 드립니다.',
+          badge: t.quotePage.serviceHeadlines?.proofreading?.badge || '원어민 감수 & 브랜드 신뢰도'
+        };
+      case 'localization':
+        return {
+          title: t.quotePage.serviceHeadlines?.localization?.title || '글로벌 사용자를 사로잡는 소프트웨어·앱·웹 현지화 견적 문의',
+          subtitle: t.quotePage.serviceHeadlines?.localization?.subtitle || '단순 번역을 넘어 UI/UX 레이아웃 최적화와 현지 문화적 맥락을 완벽히 동기화하는 전문 현지화 솔루션을 제공합니다.',
+          badge: t.quotePage.serviceHeadlines?.localization?.badge || 'UI/UX 글로벌 최적화'
+        };
+      case 'business-marketing':
+        return {
+          title: t.quotePage.serviceHeadlines?.businessMarketing?.title || '글로벌 시장의 마음을 움직이는 비즈니스·마케팅 카피 번역 견적 문의',
+          subtitle: t.quotePage.serviceHeadlines?.businessMarketing?.subtitle || '브랜드의 고유한 가치와 감성적 임팩트를 온전히 살려 해외 고객을 설득하는 맞춤형 트랜스크리에이션(Transcreation)을 제공합니다.',
+          badge: t.quotePage.serviceHeadlines?.businessMarketing?.badge || '트랜스크리에이션 & 마케팅 카피'
+        };
+      case 'multilingual-content':
+        return {
+          title: t.quotePage.serviceHeadlines?.multilingualContent?.title || '글로벌 동시 확장을 위한 올인원 다국어 통합 파이프라인 견적 문의',
+          subtitle: t.quotePage.serviceHeadlines?.multilingualContent?.subtitle || '다국가 동시 진출 기업을 위해 전담 번역 자산(TM) 구축과 1:1 전담 PM 밀착 관리로 비용 절감과 납기 단축을 실현합니다.',
+          badge: t.quotePage.serviceHeadlines?.multilingualContent?.badge || '엔터프라이즈 통합 솔루션'
+        };
+      case 'translation':
+      default:
+        return {
+          title: t.quotePage.serviceHeadlines?.translation?.title || '빠르고 정확한 다국어 전문 번역 견적 신청',
+          subtitle: t.quotePage.serviceHeadlines?.translation?.subtitle || '각 분야 전문 번역사의 정확한 번역으로 비즈니스와 글로벌 소통을 지원합니다.',
+          badge: t.quotePage.serviceHeadlines?.translation?.badge || '전문 번역 및 품질 보증'
+        };
+    }
+  }, [activeCategory, t.quotePage]);
+
+  const categoryTabs = [
+    {
+      id: 'translation' as QuoteServiceCategory,
+      label: t.quotePage.serviceHeadlines?.translation?.tabLabel || '전문 문서 번역',
+      badge: t.quotePage.serviceHeadlines?.translation?.badge || '품질 보증',
+      icon: Languages
+    },
+    {
+      id: 'product-detail' as QuoteServiceCategory,
+      label: t.quotePage.serviceHeadlines?.productDetail?.tabLabel || '상세페이지 기획·현지화',
+      badge: t.quotePage.serviceHeadlines?.productDetail?.badge || 'CVR 극대화',
+      icon: ShoppingBag
+    },
+    {
+      id: 'proofreading' as QuoteServiceCategory,
+      label: t.quotePage.serviceHeadlines?.proofreading?.tabLabel || '원어민 감수 및 교정',
+      badge: t.quotePage.serviceHeadlines?.proofreading?.badge || '원어민 1:1',
+      icon: FileCheck2
+    },
+    {
+      id: 'localization' as QuoteServiceCategory,
+      label: t.quotePage.serviceHeadlines?.localization?.tabLabel || '소프트웨어 & 앱 현지화',
+      badge: t.quotePage.serviceHeadlines?.localization?.badge || 'UI/UX 최적화',
+      icon: Globe2
+    },
+    {
+      id: 'business-marketing' as QuoteServiceCategory,
+      label: t.quotePage.serviceHeadlines?.businessMarketing?.tabLabel || '비즈니스 & 마케팅 번역',
+      badge: t.quotePage.serviceHeadlines?.businessMarketing?.badge || '트랜스크리에이션',
+      icon: Megaphone
+    },
+    {
+      id: 'multilingual-content' as QuoteServiceCategory,
+      label: t.quotePage.serviceHeadlines?.multilingualContent?.tabLabel || '다국어 통합 파이프라인',
+      badge: t.quotePage.serviceHeadlines?.multilingualContent?.badge || '엔터프라이즈',
+      icon: Layers
+    }
+  ];
 
   // File upload change handler with strict security and size verification
   const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,17 +459,42 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10 text-slate-900 bg-transparent">
       
+      {/* Service Category Switcher Tabs */}
+      <div className="flex justify-center pt-2">
+        <div className="inline-flex p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/90 shadow-xs max-w-full overflow-x-auto gap-1">
+          {categoryTabs.map(tab => {
+            const isSelected = activeCategory === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => handleSelectCategory(tab.id)}
+                className={`px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer select-none whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-white text-blue-600 shadow-sm border border-slate-200/90 font-extrabold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 font-semibold'
+                }`}
+              >
+                <Icon className={`w-4 h-4 ${isSelected ? 'text-blue-600' : 'text-slate-400'}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Title & Subtitle */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>{t.quotePage.badge}</span>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold">
+          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+          <span>{activeHeadline.badge}</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          {t.quotePage.title}
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-snug">
+          {activeHeadline.title}
         </h1>
-        <p className="text-slate-600 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-          {t.quotePage.subtitle}
+        <p className="text-slate-600 text-xs sm:text-base max-w-2xl mx-auto leading-relaxed">
+          {activeHeadline.subtitle}
         </p>
       </div>
 
@@ -530,14 +760,74 @@ export const FreeQuotePage: React.FC<FreeQuotePageProps> = ({
               <span>{t.quotePage.step3Title}</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Service Selection: Visual Auto-Check Radio Cards */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-700">
+                  {t.quotePage.serviceType} (희망 서비스) <span className="text-rose-500">*</span>
+                </label>
+                <span className="text-[11px] text-blue-700 font-semibold flex items-center gap-1.5 bg-blue-50/80 px-2.5 py-0.5 rounded-full border border-blue-200 shadow-2xs">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                  <span>{categoryTabs.find(c => c.id === activeCategory)?.label || '전문 번역'} 선택됨</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {categoryTabs.map((tab) => {
+                  const isSelected = activeCategory === tab.id;
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => handleSelectCategory(tab.id)}
+                      className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer group ${
+                        isSelected
+                          ? 'bg-blue-50/90 border-blue-500 ring-2 ring-blue-500/20 shadow-xs'
+                          : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        isSelected ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                      }`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className={`text-xs font-bold truncate ${isSelected ? 'text-blue-900' : 'text-slate-800'}`}>
+                            {tab.label}
+                          </span>
+                          <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                            isSelected 
+                              ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-500/20' 
+                              : 'border-slate-300 bg-white group-hover:border-slate-400'
+                          }`}>
+                            {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 line-clamp-1 block mt-0.5">
+                          {tab.badge}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  {t.quotePage.serviceType} / {t.quotePage.purpose}
+                  {t.quotePage.purpose} (세부 분야 및 용도)
                 </label>
                 <select
                   value={translationPurpose}
-                  onChange={(e) => setTranslationPurpose(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTranslationPurpose(val);
+                    const cat = resolveServiceCategory(val);
+                    setActiveCategory(cat);
+                  }}
                   className="w-full p-2.5 rounded-xl bg-slate-50/70 border border-slate-300 text-xs sm:text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                 >
                   {t.quotePage.purposeOptions.map((opt) => (

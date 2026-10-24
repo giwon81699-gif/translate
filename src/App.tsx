@@ -23,22 +23,57 @@ function checkIsAdminRoute(): boolean {
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<PageType>(() => {
-    return checkIsAdminRoute() ? 'admin' : 'home';
+    if (checkIsAdminRoute()) return 'admin';
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '').split('?')[0];
+      if (hash === 'services' || hash === 'quote' || hash === 'faq') {
+        return hash as PageType;
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('service')) return 'quote';
+    }
+    return 'home';
   });
-  const [servicePreselect, setServicePreselect] = useState<string | undefined>();
+  const [servicePreselect, setServicePreselect] = useState<string | undefined>(() => {
+    if (typeof window === 'undefined') return undefined;
+    const urlParams = new URLSearchParams(window.location.search);
+    const svc = urlParams.get('service');
+    if (svc) return svc;
+    const hash = window.location.hash;
+    if (hash.includes('service=')) {
+      const q = hash.split('service=')[1]?.split('&')[0];
+      if (q) return decodeURIComponent(q);
+    }
+    return undefined;
+  });
   const [wordCountPrefill, setWordCountPrefill] = useState<number | undefined>();
 
-  // Listen to popstate and hashchange for URL /admin routing
+  // Listen to popstate and hashchange for URL /admin routing and service preselection
   useEffect(() => {
     const handleUrlChange = () => {
       if (checkIsAdminRoute()) {
         setCurrentPage('admin');
       } else {
         const hash = window.location.hash.replace('#', '');
-        if (hash === 'services' || hash === 'quote' || hash === 'faq') {
-          setCurrentPage(hash as PageType);
+        const cleanHash = hash.split('?')[0];
+        if (cleanHash === 'services' || cleanHash === 'quote' || cleanHash === 'faq') {
+          setCurrentPage(cleanHash as PageType);
         } else if (!window.location.pathname.startsWith('/admin')) {
           setCurrentPage('home');
+        }
+
+        // Check for service query parameter in URL or hash
+        const urlParams = new URLSearchParams(window.location.search);
+        let svc = urlParams.get('service');
+        if (!svc && hash.includes('service=')) {
+          const hashQuery = hash.split('?')[1];
+          if (hashQuery) {
+            const hp = new URLSearchParams(hashQuery);
+            svc = hp.get('service');
+          }
+        }
+        if (svc) {
+          setServicePreselect(svc);
         }
       }
     };
@@ -158,6 +193,8 @@ function AppContent() {
         window.history.pushState(null, '', '/admin');
       } else if (page === 'home') {
         window.history.pushState(null, '', '/');
+      } else if (page === 'quote' && preselectService) {
+        window.history.pushState(null, '', `/#quote?service=${encodeURIComponent(preselectService)}`);
       } else {
         window.history.pushState(null, '', `/#${page}`);
       }

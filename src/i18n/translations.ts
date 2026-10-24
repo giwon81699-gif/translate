@@ -161,6 +161,44 @@ export interface Translations {
     badge: string;
     title: string;
     subtitle: string;
+    serviceHeadlines: {
+      translation: {
+        tabLabel: string;
+        badge: string;
+        title: string;
+        subtitle: string;
+      };
+      productDetail: {
+        tabLabel: string;
+        badge: string;
+        title: string;
+        subtitle: string;
+      };
+      proofreading: {
+        tabLabel: string;
+        badge: string;
+        title: string;
+        subtitle: string;
+      };
+      localization: {
+        tabLabel: string;
+        badge: string;
+        title: string;
+        subtitle: string;
+      };
+      businessMarketing: {
+        tabLabel: string;
+        badge: string;
+        title: string;
+        subtitle: string;
+      };
+      multilingualContent: {
+        tabLabel: string;
+        badge: string;
+        title: string;
+        subtitle: string;
+      };
+    };
     trustIso: string;
     trustNda: string;
     trustSla: string;
@@ -551,8 +589,46 @@ export const translations: Record<Language, Translations> = {
     },
     quotePage: {
       badge: '비즈니스 무료 견적',
-      title: '빠르고 정확한 다국어 번역 견적 신청',
-      subtitle: '번역하실 문서를 첨부해 주시면, 전담 PM이 영업시간 기준 2시간 이내에 세부 견적서와 최적의 납기를 제안해 드립니다.',
+      title: '빠르고 정확한 다국어 전문 번역 견적 신청',
+      subtitle: '각 분야 전문 번역사의 정확한 번역으로 비즈니스와 글로벌 소통을 지원합니다.',
+      serviceHeadlines: {
+        translation: {
+          tabLabel: '일반/전문 다국어 번역',
+          badge: '전문 번역 및 품질 보증',
+          title: '빠르고 정확한 다국어 전문 번역 견적 신청',
+          subtitle: '각 분야 전문 번역사의 정확한 번역으로 비즈니스와 글로벌 소통을 지원합니다.'
+        },
+        productDetail: {
+          tabLabel: '상세페이지 제작 및 현지화',
+          badge: '이커머스 CVR 극대화 현지화',
+          title: '현지 소비자의 구매를 부르는 상세페이지 기획·현지화 견적 문의',
+          subtitle: '어색한 직번역을 넘어, 현지 이커머스 생태계와 타깃 고객의 심리를 반영한 맞춤형 카피라이팅 및 디자인을 제공합니다.'
+        },
+        proofreading: {
+          tabLabel: '원어민 감수 및 교정',
+          badge: '원어민 감수 & 브랜드 신뢰도',
+          title: '브랜드 신뢰도를 높이는 원어민 전문 감수 및 CVR 개선 문의',
+          subtitle: '네이티브 톤앤매너 검수를 통해 어색한 표현을 바로잡고, 해외 시장에서의 브랜드 완성도를 완성해 드립니다.'
+        },
+        localization: {
+          tabLabel: '소프트웨어 & 앱 현지화',
+          badge: 'UI/UX 글로벌 최적화',
+          title: '글로벌 사용자를 사로잡는 소프트웨어·앱·웹 현지화 견적 문의',
+          subtitle: '단순 번역을 넘어 UI/UX 레이아웃 최적화와 현지 문화적 맥락을 완벽히 동기화하는 전문 현지화 솔루션을 제공합니다.'
+        },
+        businessMarketing: {
+          tabLabel: '비즈니스 & 마케팅 번역',
+          badge: '트랜스크리에이션 & 마케팅 카피',
+          title: '글로벌 시장의 마음을 움직이는 비즈니스·마케팅 카피 번역 견적 문의',
+          subtitle: '브랜드의 고유한 가치와 감성적 임팩트를 온전히 살려 해외 고객을 설득하는 맞춤형 트랜스크리에이션(Transcreation)을 제공합니다.'
+        },
+        multilingualContent: {
+          tabLabel: '다국어 통합 파이프라인',
+          badge: '엔터프라이즈 통합 솔루션',
+          title: '글로벌 동시 확장을 위한 올인원 다국어 통합 파이프라인 견적 문의',
+          subtitle: '다국가 동시 진출 기업을 위해 전담 번역 자산(TM) 구축과 1:1 전담 PM 밀착 관리로 비용 절감과 납기 단축을 실현합니다.'
+        }
+      },
       trustIso: 'ISO 17100 국제 번역 품질 표준 준수',
       trustNda: '100% 비밀유지(NDA) 및 암호화 파일 취급',
       trustSla: '영업시간 2시간 이내 견적서 회신',
@@ -1010,8 +1086,46 @@ export const translations: Record<Language, Translations> = {
     },
     quotePage: {
       badge: 'B2B Free Quote',
-      title: 'Fast & Accurate Multilingual Translation Quote',
-      subtitle: 'Attach your project files and our dedicated PM will deliver a comprehensive proposal and optimized schedule within 2 business hours.',
+      title: 'Fast & Accurate Multilingual Professional Translation Quote',
+      subtitle: 'Supporting your global business communications with certified domain-expert translators.',
+      serviceHeadlines: {
+        translation: {
+          tabLabel: 'General & Technical Translation',
+          badge: 'ISO-Certified Translation Quality',
+          title: 'Fast & Accurate Multilingual Professional Translation Quote',
+          subtitle: 'Supporting your global business communications with certified domain-expert translators.'
+        },
+        productDetail: {
+          tabLabel: 'Product Page Creation & Localization',
+          badge: 'High-Converting E-Commerce Localization',
+          title: 'E-Commerce Product Detail Page Creation & Localization Quote',
+          subtitle: 'Beyond literal translation, we deliver localized copywriting and creative design tailored to regional e-commerce ecosystems and target buyer psychology.'
+        },
+        proofreading: {
+          tabLabel: 'Native Proofreading',
+          badge: 'Native Tone & Brand Credibility',
+          title: 'Native Speaker Proofreading & CVR Improvement Quote',
+          subtitle: 'Refine nuances with native tone-and-manner editing, eliminate awkward phrasing, and elevate your global brand credibility.'
+        },
+        localization: {
+          tabLabel: 'Software & App L10n',
+          badge: 'Global UI/UX Optimization',
+          title: 'Software, App & Web Localization Quote for Global Audiences',
+          subtitle: 'Engineered localization beyond text: in-context UI string fitting, regional cultural adaptation, and flawless user experience.'
+        },
+        businessMarketing: {
+          tabLabel: 'Business & Marketing',
+          badge: 'Transcreation & Persuasive Copy',
+          title: 'High-Impact Business & Marketing Transcreation Quote',
+          subtitle: 'Preserve your unique brand narrative and emotional resonance with tailored creative transcreation for international audiences.'
+        },
+        multilingualContent: {
+          tabLabel: 'Multilingual Pipeline',
+          badge: 'Enterprise Turnkey Solution',
+          title: 'All-in-One Multilingual Pipeline Quote for Global Expansion',
+          subtitle: 'End-to-end Translation Memory (TM) assets, glossary governance, and dedicated 1:1 PM support for simultaneous multi-region rollouts.'
+        }
+      },
       trustIso: 'Certified to ISO 17100 International Translation Standard',
       trustNda: '100% Non-Disclosure (NDA) and Encrypted File Handling',
       trustSla: 'Official quote response within 2 business hours',
@@ -1469,8 +1583,46 @@ export const translations: Record<Language, Translations> = {
     },
     quotePage: {
       badge: '法人・個人向け無料見積り',
-      title: '迅速・高精度な多言語翻訳のお見積り申請',
-      subtitle: '原稿ファイルを添付していただければ、専任PMが営業時間内2時間以内に詳細なお見積り書と最適納期をご提案いたします。',
+      title: '迅速で正確な多言語専門翻訳のお見積もり',
+      subtitle: '各分野の専門翻訳者による高精度な翻訳で、グローバルビジネスと円滑なコミュニケーションを支援します。',
+      serviceHeadlines: {
+        translation: {
+          tabLabel: '一般・専門多言語翻訳',
+          badge: 'ISO準拠の高品質翻訳',
+          title: '迅速で正確な多言語専門翻訳のお見積もり',
+          subtitle: '各分野の専門翻訳者による高精度な翻訳で、グローバルビジネスと円滑なコミュニケーションを支援します。'
+        },
+        productDetail: {
+          tabLabel: '詳細ページ制作・ローカライズ',
+          badge: 'EC購入転換率を最大化',
+          title: '現地消費者の購買意欲を高める商品詳細ページ企画・ローカライズ見積もり',
+          subtitle: '直訳にとどまらず、現地のEC市場環境とターゲット顧客の心理を反映した最適なコピーライティングとデザインをご提案します。'
+        },
+        proofreading: {
+          tabLabel: 'ネイティブ校正・検閲',
+          badge: 'ネイティブ監修とブランド向上',
+          title: 'ブランド信頼度を高めるネイティブ校正・CVR改善見積もり',
+          subtitle: 'ネイティブの自然なトーン＆マナーで不自然な表現を修正し、海外市場におけるブランドの完成度と信頼性を高めます。'
+        },
+        localization: {
+          tabLabel: 'アプリ・Webローカライズ',
+          badge: 'UI/UXのグローバル最適化',
+          title: '海外ユーザーを魅了するソフトウェア・アプリ・Webローカライズ見積もり',
+          subtitle: '単なる翻訳を超え、UI/UXレイアウトの最適化と現地の文化的コンテキストを完全に調和させる専門ローカライズを提供します。'
+        },
+        businessMarketing: {
+          tabLabel: 'ビジネス＆マーケティング',
+          badge: 'トランスクリエーション',
+          title: '海外市場の心を動かすビジネス・マーケティング翻訳見積もり',
+          subtitle: 'ブランド固有の価値と情緒的インパクトを忠実に再現し、海外顧客の共感を呼ぶトランスクリエーションをご提供します。'
+        },
+        multilingualContent: {
+          tabLabel: '多言語統合パイプライン',
+          badge: 'エンタープライズ統合管理',
+          title: '世界同時展開のためのオールインワン多言語統合パイプライン見積もり',
+          subtitle: '多言語同時展開企業向けに専用翻訳メモリ(TM)構築と専任PMによる徹底管理で、コスト削減と納期短縮を実現します。'
+        }
+      },
       trustIso: 'ISO 17100 国際翻訳品質基準を厳格に遵守',
       trustNda: '100% 機密保持契約(NDA)および暗号化ファイルの安全管理',
       trustSla: '営業時間内なら2時間以内に正式見積りを返信',
@@ -1928,8 +2080,46 @@ export const translations: Record<Language, Translations> = {
     },
     quotePage: {
       badge: '企业级免费报价',
-      title: '高效精准的多语言翻译报价申请',
-      subtitle: '上传待翻译文件，专属项目经理将在工作时间2小时内为您出具详尽报价单及最优排期建议。',
+      title: '快捷精准的多语言专业翻译报价申请',
+      subtitle: '依托各行业资深专业译员的高品质翻译，全力护航您的全球化业务与国际沟通。',
+      serviceHeadlines: {
+        translation: {
+          tabLabel: '通用/专业多语言翻译',
+          badge: 'ISO认证高质量翻译',
+          title: '快捷精准的多语言专业翻译报价申请',
+          subtitle: '依托各行业资深专业译员的高品质翻译，全力护航您的全球化业务与国际沟通。'
+        },
+        productDetail: {
+          tabLabel: '详情页制作与本地化',
+          badge: '跨境电商高转化本地化',
+          title: '激发当地消费者购买欲的商品详情页策划与本地化报价咨询',
+          subtitle: '跨越生硬直译，结合当地电商生态与目标客户心理，提供量身定制的高转化文案与设计。'
+        },
+        proofreading: {
+          tabLabel: '母语审校与润色',
+          badge: '母语级语感与品牌背书',
+          title: '提升品牌公信力的母语专家审校与转化率优化咨询',
+          subtitle: '通过纯正母语语调与风格润色，纠正生硬表达，全面提升品牌在海外市场的专业度与信赖感。'
+        },
+        localization: {
+          tabLabel: '软件与应用本地化',
+          badge: 'UI/UX全球化优化',
+          title: '吸引全球用户的软件·应用·网站本地化报价咨询',
+          subtitle: '超越普通文字翻译，完美融合UI/UX界面适配与目标市场文化习惯，提供一站式专业本地化方案。'
+        },
+        businessMarketing: {
+          tabLabel: '商务与营销翻译',
+          badge: '创意创译与文案策划',
+          title: '打动海外客户的商务与营销创意翻译报价咨询',
+          subtitle: '深度保留品牌核心价值与情感感染力，通过专业创译(Transcreation)有效激发海外受众共鸣。'
+        },
+        multilingualContent: {
+          tabLabel: '多语言整合管线',
+          badge: '企业级全流程方案',
+          title: '赋能全球同步扩张的一体化多语言管线报价咨询',
+          subtitle: '为多国同步出海企业构建专属翻译资产库(TM)并由专属PM一对一跟进，实现降本增效与极速交付。'
+        }
+      },
       trustIso: '严格遵循 ISO 17100 国际翻译服务质量标准',
       trustNda: '100% 签署保密协议(NDA)与文档加密安全流转',
       trustSla: '工作时间内2小时极速回传正式报价单',
@@ -2387,8 +2577,46 @@ export const translations: Record<Language, Translations> = {
     },
     quotePage: {
       badge: 'Cotización Gratuita para Empresas',
-      title: 'Cotización Rápida y Precisa de Traducción Multilingüe',
-      subtitle: 'Adjunte sus documentos y nuestro PM asignado le enviará una propuesta detallada y el plazo idóneo en menos de 2 horas hábiles.',
+      title: 'Solicitud de Cotización de Traducción Profesional Rápida y Precisa',
+      subtitle: 'Respaldamos su comunicación global y negocios internacionales con traducciones certificadas por expertos sectoriales.',
+      serviceHeadlines: {
+        translation: {
+          tabLabel: 'Traducción General y Especializada',
+          badge: 'Calidad de Traducción Certificada',
+          title: 'Solicitud de Cotización de Traducción Profesional Rápida y Precisa',
+          subtitle: 'Respaldamos su comunicación global y negocios internacionales con traducciones certificadas por expertos sectoriales.'
+        },
+        productDetail: {
+          tabLabel: 'Fichas de Producto y Localización',
+          badge: 'Alta Conversión en E-Commerce',
+          title: 'Cotización de Planificación y Localización de Páginas de Producto de Alta Conversión',
+          subtitle: 'Más allá de la traducción literal, ofrecemos redacción publicitaria y diseño adaptados al ecosistema de comercio electrónico y a la psicología del consumidor local.'
+        },
+        proofreading: {
+          tabLabel: 'Corrección por Nativos',
+          badge: 'Tono Nativo y Confianza de Marca',
+          title: 'Cotización de Corrección Profesional Nativa y Optimización de CVR de Marca',
+          subtitle: 'Perfeccionamos el tono y estilo con hablantes nativos, eliminando expresiones forzadas y elevando la reputación de su marca global.'
+        },
+        localization: {
+          tabLabel: 'Localización de Software & Apps',
+          badge: 'Optimización Global de UI/UX',
+          title: 'Cotización de Localización de Software, Apps y Sitios Web para Audiencias Globales',
+          subtitle: 'Localización técnica integral: ajuste de strings UI/UX, adaptación cultural y experiencia de usuario impecable.'
+        },
+        businessMarketing: {
+          tabLabel: 'Negocios y Marketing',
+          badge: 'Transcreación Persuasiva',
+          title: 'Cotización de Transcreación de Marketing y Negocios de Alto Impacto',
+          subtitle: 'Conserve la narrativa y la fuerza emocional de su marca mediante redacción creativa adaptada a mercados internacionales.'
+        },
+        multilingualContent: {
+          tabLabel: 'Pipeline Multilingüe',
+          badge: 'Solución Empresarial Integral',
+          title: 'Cotización de Pipeline Multilingüe Integral para la Expansión Global Simultánea',
+          subtitle: 'Gestión de memorias de traducción (TM), glosarios corporativos y PM exclusivo para lanzamientos sincronizados.'
+        }
+      },
       trustIso: 'Certificado bajo la norma internacional de traducción ISO 17100',
       trustNda: '100% Confidencialidad (NDA) y gestión segura de archivos encriptados',
       trustSla: 'Cotización formal remitida en menos de 2 horas laborables',

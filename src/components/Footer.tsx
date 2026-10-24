@@ -4,14 +4,14 @@ import { useLanguage } from '../context/LanguageContext';
 import { Globe, ShieldCheck, Lock, CheckCircle2 } from 'lucide-react';
 
 interface FooterProps {
-  onNavigate: (page: PageType) => void;
+  onNavigate: (page: PageType, servicePreselect?: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const { t } = useLanguage();
 
-  const handleNav = (page: PageType) => {
-    onNavigate(page);
+  const handleNav = (page: PageType, servicePreselect?: string) => {
+    onNavigate(page, servicePreselect);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -118,7 +118,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               {t.services.items.map((s) => (
                 <li key={s.id}>
                   <button 
-                    onClick={() => handleNav('services')}
+                    onClick={() => handleNav('quote', s.id)}
                     className="hover:text-blue-600 transition-colors text-left cursor-pointer"
                   >
                     {s.title}
